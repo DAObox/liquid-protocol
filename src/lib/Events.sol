@@ -1,0 +1,40 @@
+// SPDX-License-Identifier: MIT
+pragma solidity >=0.8.0;
+
+library Events {
+    /**
+     * @dev Emitted when tokens are minted continuously (the normal minting process).
+     * @param buyer The address of the account that initiated the minting process.
+     * @param minted The amount of tokens that were minted.
+     * @param depositAmount The amount of ether that was deposited to mint the tokens.
+     * @param reserveAmount The amount of ether that was added to the reserve.
+     * @param fundingAmount The amount of ether that was sent to the owner as funding.
+     */
+    event ContinuousMint(
+        address indexed buyer, uint256 minted, uint256 depositAmount, uint256 reserveAmount, uint256 fundingAmount
+    );
+
+    /**
+     * @dev Emitted when tokens are burned continuously (the normal burning process).
+     * @param burner The address of the account that initiated the burning process.
+     * @param burned The amount of tokens that were burned.
+     * @param reimburseAmount The amount of ether that was reimbursed to the burner.
+     * @param exitFee The amount of ether that was deducted as an exit fee.
+     */
+    event ContinuousBurn(address indexed burner, uint256 burned, uint256 reimburseAmount, uint256 exitFee);
+
+    /**
+     * @dev Emitted when tokens are minted in a sponsored process.
+     * @param sender The address of the account that initiated the minting process.
+     * @param depositAmount The amount of ether that was deposited to mint the tokens.
+     * @param minted The amount of tokens that were minted.
+     */
+    event SponsoredMint(address indexed sender, uint256 depositAmount, uint256 minted);
+
+    /**
+     * @dev Emitted when tokens are burned in a sponsored process.
+     * @param sender The address of the account that initiated the burning process.
+     * @param burnAmount The amount of tokens that were burned.
+     */
+    event SponsoredBurn(address indexed sender, uint256 burnAmount);
+}

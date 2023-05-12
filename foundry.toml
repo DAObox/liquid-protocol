@@ -1,15 +1,18 @@
 # Additional configuration and default values at https://github.com/gakonst/foundry/tree/master/config
-[default]
+[profile.default]
 
 # Sets the concrete solc version to use
 # This overrides the `auto_detect_solc` value
-# solc_version = '0.8.13'
+# solc_version = '0.8.0'
 
 remappings = [
   "ds/=lib/ds-test/src/",
   "@std=lib/forge-std/src/",
-  "@openzeppelin=lib/openzeppelin-contracts/contracts/",
+  "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts",
+  "@aragon/=lib/osx/packages/contracts/src/",
+  "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/"
+
 ]
 
-[ci]
+[profile.ci]
 fuzz_runs = 2_000
