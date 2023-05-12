@@ -1,6 +1,6 @@
 <img align="right" width="160" height="160" top="100" src="./assets/readme.png">
 
-# Liquid Protocol • [![tests](https://github.com/daobox/liquid-protocol/actions/workflows/tests.yml/badge.svg)](https://github.com/daobox/liquid-protocol/actions/workflows/tests.yml) [![lints](https://github.com/daobox/liquid-protocol/actions/workflows/lints.yml/badge.svg)](https://github.com/daobox/liquid-protocol/actions/workflows/lints.yml) ![GitHub](https://img.shields.io/github/daobox/liquid-protocol/LICENCE) ![GitHub package.json version](https://img.shields.io/github/package-json/v/daobox/liquid-protocol)
+# Liquid Protocol • [![tests](https://github.com/daobox/liquid-protocol/actions/workflows/tests.yml/badge.svg)](https://github.com/daobox/liquid-protocol/actions/workflows/tests.yml) [![lints](https://github.com/daobox/liquid-protocol/actions/workflows/lints.yml/badge.svg)](https://github.com/daobox/liquid-protocol/actions/workflows/lints.yml) ![GitHub](https://img.shields.io/github/daobox/liquid-protocol/LICENCE) ![GitHub package.json version](https://img.shields.io/github/package-json/v/daobox/liquid-protocol/packageName)
 
 
 

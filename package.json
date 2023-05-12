@@ -21,9 +21,10 @@
     "template",
     "erc20",
     "openzeppelin",
-    "Solidity"
+    "Solidity",
+    "aragon",
+    "dao"
   ],
-  "author": "Markus Waas (mail@markuswaas.com)",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/daobox/liquid-protocol/issues"
