@@ -2,6 +2,9 @@
 pragma solidity >=0.8.0;
 
 library Errors {
+    /// @notice Error thrown when the market is already open
+    error TradingAlreadyOpened();
+
     /// @notice Error thrown when the initial reserve for the token contract is zero.
     error InitialReserveCannotBeZero();
 

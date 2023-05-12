@@ -20,6 +20,7 @@ import {LiquidBase} from "./LiquidBase.sol";
 contract LiquidTokenPlugin is LiquidBase, PluginCloneable {
     /// @notice The ID of the permission required to call the `executeProposal` function.
     bytes32 public constant MODIFY_CURVE_PERMISSION_ID = keccak256("MODIFY_CURVE_PERMISSION");
+    bytes32 public constant SEED_PERMISSION_ID = keccak256("SEED_PERMISSION");
 
     /**
      * @notice Initializes the contract with given parameters.
@@ -29,7 +30,6 @@ contract LiquidTokenPlugin is LiquidBase, PluginCloneable {
      * @param _owner The address of the owner of this contract.
      * @param _name The name of the token.
      * @param _symbol The symbol of the token.
-     * @param _initialSupply The initial supply of the token.
      * @param _curve The curve parameters for the token. This includes:
      *        {fundingRate} - The percentage of funds that go to the owner. Maximum value is 10000 (i.e., 100%).
      *        {exitFee} - The percentage of funds that are taken as fee when tokens are burned. Maximum value is 5000 (i.e., 50%).
@@ -41,11 +41,10 @@ contract LiquidTokenPlugin is LiquidBase, PluginCloneable {
         address _owner,
         string memory _name,
         string memory _symbol,
-        uint256 _initialSupply,
         CurveParameters memory _curve
     ) external initializer {
         __PluginCloneable_init(_dao);
-        __LiquidToken_init(_owner, _name, _symbol, _owner, _initialSupply, _curve);
+        __LiquidToken_init(_owner, _name, _symbol, _curve);
 
         owner = _owner;
     }
@@ -62,5 +61,13 @@ contract LiquidTokenPlugin is LiquidBase, PluginCloneable {
      */
     function setGovernanceParameter(bytes32 what, bytes memory value) external auth(MODIFY_CURVE_PERMISSION_ID) {
         _setGovernance(what, value);
+    }
+
+    function openTrading(address[] memory addresses, uint256[] memory amounts)
+        external
+        payable
+        auth(SEED_PERMISSION_ID)
+    {
+        _openTrading(addresses, amounts);
     }
 }

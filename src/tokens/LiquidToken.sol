@@ -30,17 +30,14 @@ contract LiquidToken is LiquidBase {
      * @param _owner The address of the contract owner.
      * @param _name The name of the token.
      * @param _symbol The symbol of the token.
-     * @param _initialSupply The initial supply of tokens.
      * @param _curve The bonding curve parameters for the token.
      */
-    function initialize(
-        address _owner,
-        string memory _name,
-        string memory _symbol,
-        uint256 _initialSupply,
-        CurveParameters memory _curve
-    ) external payable initializer {
-        __LiquidToken_init(_owner, _name, _symbol, _owner, _initialSupply, _curve);
+    function initialize(address _owner, string memory _name, string memory _symbol, CurveParameters memory _curve)
+        external
+        payable
+        initializer
+    {
+        __LiquidToken_init(_owner, _name, _symbol, _curve);
     }
 
     /**
@@ -57,5 +54,9 @@ contract LiquidToken is LiquidBase {
         if (msg.sender != owner) revert Errors.OnlyOwner(msg.sender, owner);
 
         _setGovernance(what, value);
+    }
+
+    function openTrading(address[] memory addresses, uint256[] memory amounts) external payable {
+        _openTrading(addresses, amounts);
     }
 }

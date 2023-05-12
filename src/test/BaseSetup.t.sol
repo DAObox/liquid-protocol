@@ -42,6 +42,16 @@ contract BaseSetup is Test {
 
         vm.prank(owner);
         token = new LiquidToken();
-        token.initialize{value: 100e18}(address(owner), "Khalid Coin", "KK", 1000e18, curve);
+        token.initialize(address(owner), "Khalid Coin", "KK", curve);
+    }
+
+    function openTrading() public {
+        address[] memory seedAddresses = new address[](1);
+        uint256[] memory values = new uint256[](1);
+        seedAddresses[0] = owner;
+        values[0] = 100 ether;
+
+        vm.prank(owner);
+        token.openTrading{value: 100 ether}(seedAddresses, values);
     }
 }

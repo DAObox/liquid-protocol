@@ -54,6 +54,8 @@ abstract contract LiquidBase is
     /// @notice The owner address, usually a DAO
     address internal owner;
 
+    bool private _tradingInitialized;
+
     // =============================================================== //
     // ========================= INITIALIZE ========================== //
     // =============================================================== //
@@ -89,7 +91,6 @@ abstract contract LiquidBase is
         __ERC20Votes_init();
 
         owner = _owner;
-        reserve = address(this).balance;
 
         curve.fundingRate = _curve.fundingRate;
         curve.exitFee = _curve.exitFee;
@@ -116,12 +117,15 @@ abstract contract LiquidBase is
      *
      * Emits a {Transfer} event for each mint operation.
      */
-    function openTrading(address[] memory addresses, uint256[] memory amounts) public payable {
-        if (msg.sender != owner) revert Errors.OnlyOwner({caller: msg.sender, owner: owner});
+    function _openTrading(address[] memory addresses, uint256[] memory amounts) internal {
         if (address(this).balance == 0) revert Errors.InitialReserveCannotBeZero();
         if (addresses.length != amounts.length) {
             revert Errors.AddressesAmountMismatch({addresses: addresses.length, values: amounts.length});
         }
+        if (_tradingInitialized == true) revert Errors.TradingAlreadyOpened();
+        _tradingInitialized = true;
+
+        reserve = address(this).balance;
 
         _unpause();
         for (uint256 i = 0; i < addresses.length; i++) {
