@@ -1,11 +1,10 @@
 <img align="right" width="160" height="160" top="100" src="./assets/readme.png">
 
-# Liquid DAOs • [![tests](https://github.com/daobox/liquid-protocol/actions/workflows/tests.yml/badge.svg)](https://github.com/daobox/liquid-protocol/actions/workflows/tests.yml) [![lints](https://github.com/daobox/liquid-protocol/actions/workflows/lints.yml/badge.svg)](https://github.com/daobox/liquid-protocol/actions/workflows/lints.yml) ![GitHub](https://img.shields.io/github/license/daobox/liquid-protocol) ![GitHub package.json version](https://img.shields.io/github/package-json/v/daobox/liquid-protocol)
+# Liquid Protocol • [![tests](https://github.com/daobox/liquid-protocol/actions/workflows/tests.yml/badge.svg)](https://github.com/daobox/liquid-protocol/actions/workflows/tests.yml) [![lints](https://github.com/daobox/liquid-protocol/actions/workflows/lints.yml/badge.svg)](https://github.com/daobox/liquid-protocol/actions/workflows/lints.yml) ![GitHub](https://img.shields.io/github/license/daobox/liquid-protocol) ![GitHub package.json version](https://img.shields.io/github/package-json/v/daobox/liquid-protocol)
 
 
 
 
-## Liquid Protocol
 a governance protocol designed to empower creatives and commintites by coordinating incentive alignment with their stakeholders. Drawing heavy inspiration from [Continuous Organizations](https://github.com/C-ORG/whitepaper#challenges), our protocol introduces a model for DAOs by merging token bonding curves, market making, governance into a single, cohesive entity.
 
 At its core, the Liquid Protocol facilitates the creation of Continuous Organizations, entities that operate with continuous financing and strong stakeholder alignment, all underpinned by a unique native token. This token, apart from serving as a store of value, also confers governance rights in the associated DAO, creating a harmonious feedback loop between financial and decision-making power.
