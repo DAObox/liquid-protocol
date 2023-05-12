@@ -1,32 +1,41 @@
-<img align="right" width="160" height="160" top="100" src="./assets/readme.jpeg">
+<img align="right" width="160" height="160" top="100" src="./assets/readme.png">
 
-# forge-erc20 • [![tests](https://github.com/soliditylabs/forge-erc20-template/actions/workflows/tests.yml/badge.svg)](https://github.com/soliditylabs/forge-erc20-template/actions/workflows/tests.yml) [![lints](https://github.com/soliditylabs/forge-erc20-template/actions/workflows/lints.yml/badge.svg)](https://github.com/soliditylabs/forge-erc20-template/actions/workflows/lints.yml) ![GitHub](https://img.shields.io/github/license/soliditylabs/forge-erc20-template) ![GitHub package.json version](https://img.shields.io/github/package-json/v/soliditylabs/forge-erc20-template)
+# Liquid Protocol • [![tests](https://github.com/daobox/liquid-protocol/actions/workflows/tests.yml/badge.svg)](https://github.com/daobox/liquid-protocol/actions/workflows/tests.yml) [![lints](https://github.com/daobox/liquid-protocol/actions/workflows/lints.yml/badge.svg)](https://github.com/daobox/liquid-protocol/actions/workflows/lints.yml) ![GitHub](https://img.shields.io/github/daobox/liquid-protocol/LICENCE) ![GitHub package.json version](https://img.shields.io/github/package-json/v/daobox/liquid-protocol/packageName)
 
-Template for Forge based on [femplate](https://github.com/abigger87/femplate) and [forge-template](https://github.com/FrankieIsLost/forge-template) with ERC-20 example tests.
 
-## Getting Started
 
-Click `use this template` on [Github](https://github.com/soliditylabs/forge-erc20-template) to create a new repository with this repo as the initial state.
 
-Or run (also works for existing projects):
+a governance protocol designed to empower creatives and commintites by coordinating incentive alignment with their stakeholders. Drawing heavy inspiration from [Continuous Organizations](https://github.com/C-ORG/whitepaper#challenges), our protocol introduces a model for DAOs by merging token bonding curves, market making, governance into a single, cohesive entity.
 
-```bash
-forge init --template https://github.com/soliditylabs/forge-erc20-template
-git submodule update --init --recursive
-forge install
-```
+At its core, the Liquid Protocol facilitates the creation of Continuous Organizations, entities that operate with continuous financing and strong stakeholder alignment, all underpinned by a unique native token. This token, apart from serving as a store of value, also confers governance rights in the associated DAO, creating a harmonious feedback loop between financial and decision-making power.
+
+The protocol enables any inderviduals or associan to set up a continuous funding mechanism and maintain a liquidity pool of orgnisations native asset, regardless of the size of its market. This mechanism aligns the financial interests of all stakeholders - founders, employees, investors, and the broader community.
+
+In essence, Liquid Protocol paves the way for a new wave of DAOs where stakeholders can invest in an organization at any given time, capture the value they help generate, and where their financial and decision-making interests are fully aligned with the success of the organization.
+
+This repo contains the smart contracts, interfaces, and libraries that underpin Liquid Protocol. We invite you to explore the protocol, interact with the codebase, and join us in our journey towards redefining organizational structures for the decentralized world. Your contributions are more than welcome.
+
+<br>
 
 ## Blueprint
 
 ```ml
-lib
-├─ ds-test — https://github.com/dapphub/ds-test
-├─ forge-std — https://github.com/brockelmore/forge-std
-├─ openzeppelin-contracts — https://github.com/OpenZeppelin/openzeppelin-contracts
 src
-├─ tests
-│  └─ MyERC20.t — "ERC-20 Transfer Tests"
-└─ MyERC20 — "A Minimal ERC-20 Contract"
+├── curves
+│   └── BancorBondingCurve.sol
+├── interfaces
+│   └── IBondingCurve.sol
+├── lib
+│   ├── Errors.sol
+│   ├── Events.sol
+│   └── Types.sol
+├── math
+│   ├── BancorFormula.sol
+│   └── Power.sol
+└── tokens
+    ├── LiquidBase.sol
+    ├── LiquidToken.sol
+    └── LiquidTokenPlugin.sol
 ```
 
 ## Development
@@ -43,21 +52,7 @@ forge build
 forge test -vvvvv
 ```
 
-**Deployment & Verification**
 
-Copy the .env.example file to .env and update the values.
-
-To deploy the ERC-20 to Rinkeby:
-
-```bash
-./scripts/deploy-to-rinkeby.sh
-```
-
-To verify the ERC-20 on Rinkeby:
-
-```bash
-./scripts/deploy-to-rinkeby.sh
-```
 
 ### First time with Forge/Foundry?
 
@@ -81,33 +76,12 @@ foundryup
 
 🎉 Foundry is installed! 🎉
 
-### Writing Tests with Foundry
-
-With [Foundry](https://gakonst.xyz), tests are written in Solidity! 🥳
-
-Create a test file for your contract in the `src/tests/` directory.
-
-For example, [`src/MyERC20.sol`](./src/MyERC20.sol) has its test file defined in [`./src/tests/MyERC20.t.sol`](./src/tests/MyERC20.t.sol).
-
-### Configure Foundry
-
-Using [foundry.toml](./foundry.toml), Foundry is easily configurable.
-
-For a full list of configuration options, see the Foundry [configuration documentation](https://github.com/gakonst/foundry/blob/master/config/README.md#all-options).
 
 ## License
 
-[MIT](https://github.com/soliditylabs/forge-erc20-template/blob/master/LICENSE)
+[MIT](https://github.com/daobox/liquid-protocol/blob/master/LICENSE)
 
-## Acknowledgements
-
-- [femplate](https://github.com/abigger87/femplate) as main reference
-- [foundry](https://github.com/gakonst/foundry)
-- [Openzeppelin](https://github.com/Openzeppelin/openzeppelin-contracts)
-- [forge-std](https://github.com/brockelmore/forge-std)
-- [forge-template](https://github.com/FrankieIsLost/forge-template) by [FrankieIsLost](https://github.com/FrankieIsLost).
-- [Georgios Konstantopoulos](https://github.com/gakonst) for [forge-template](https://github.com/gakonst/forge-template) resource.
 
 ## Disclaimer
 
-_These smart contracts are being provided as is. No guarantee, representation or warranty is being made, express or implied, as to the safety or correctness of the user interface or the smart contracts. They have not been audited and as such there can be no assurance they will work as intended, and users may experience delays, failures, errors, omissions, loss of transmitted information or loss of funds. The creators are not liable for any of the foregoing. Users should proceed with caution and use at their own risk._
+> The Protocol is a work in progress, subject to change, and provided "AS IS", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and non-infringement. In no event shall the authors or copyright holders be liable for any claim, damages, or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the software or the use or other dealings in the software. All use of this protocol and deployment of these smart contracts are at the user's own risk. Users should ensure they comply with all laws and regulations in their respective jurisdictions before using or deploying these contracts. The creators and contributors to this protocol are not responsible for any losses or damages incurred as a result of using or deploying these contracts.

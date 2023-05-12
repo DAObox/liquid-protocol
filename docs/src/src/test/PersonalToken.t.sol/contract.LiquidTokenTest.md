@@ -1,5 +1,5 @@
 # LiquidTokenTest
-[Git Source](https://github.com/DAObox/fantastic-spork/blob/417d39e05e02311e6212644ed1689713e91fc673/src/test/PersonalToken.t.sol)
+[Git Source](https://github.com/DAObox/fantastic-spork/blob/37171c98e431882ac7150395fb59a9c8f7e87ee4/src/test/PersonalToken.t.sol)
 
 **Inherits:**
 [BaseSetup](/src/test/BaseSetup.t.sol/contract.BaseSetup.md)

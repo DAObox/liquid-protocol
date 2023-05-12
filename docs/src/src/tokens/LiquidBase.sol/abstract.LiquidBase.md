@@ -1,5 +1,5 @@
 # LiquidBase
-[Git Source](https://github.com/DAObox/fantastic-spork/blob/417d39e05e02311e6212644ed1689713e91fc673/src/tokens/LiquidBase.sol)
+[Git Source](https://github.com/DAObox/fantastic-spork/blob/37171c98e431882ac7150395fb59a9c8f7e87ee4/src/tokens/LiquidBase.sol)
 
 **Inherits:**
 ERC20Upgradeable, ERC20BurnableUpgradeable, ERC20VotesUpgradeable, PausableUpgradeable
@@ -55,6 +55,13 @@ address internal owner;
 ```
 
 
+### _tradingInitialized
+
+```solidity
+bool private _tradingInitialized;
+```
+
+
 ## Functions
 ### __LiquidToken_init
 
@@ -78,7 +85,7 @@ function __LiquidToken_init(address _owner, string memory _name, string memory _
 |`_curve`|`CurveParameters`|The parameters for the curve. This includes: {fundingRate} - The percentage of funds that go to the owner. Maximum value is 10000 (i.e., 100%). {exitFee} - The percentage of funds that are taken as fee when tokens are burned. Maximum value is 5000 (i.e., 50%). {reserveRatio} - The ratio for the reserve in the BancorBondingCurve. {formula} - The implementation of the bonding curve.|
 
 
-### openTrading
+### _openTrading
 
 Make sure that the contract holds a non-zero balance of ETH before calling this function.
 Reverts if:
@@ -91,7 +98,7 @@ Emits a {Transfer} event for each mint operation.
 
 
 ```solidity
-function openTrading(address[] memory addresses, uint256[] memory amounts) public payable;
+function _openTrading(address[] memory addresses, uint256[] memory amounts) internal;
 ```
 **Parameters**
 

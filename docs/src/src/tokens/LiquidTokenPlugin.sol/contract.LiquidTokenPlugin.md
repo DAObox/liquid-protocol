@@ -1,5 +1,5 @@
 # LiquidTokenPlugin
-[Git Source](https://github.com/DAObox/fantastic-spork/blob/417d39e05e02311e6212644ed1689713e91fc673/src/tokens/LiquidTokenPlugin.sol)
+[Git Source](https://github.com/DAObox/fantastic-spork/blob/37171c98e431882ac7150395fb59a9c8f7e87ee4/src/tokens/LiquidTokenPlugin.sol)
 
 **Inherits:**
 [LiquidBase](/src/tokens/LiquidBase.sol/abstract.LiquidBase.md), PluginCloneable
@@ -25,6 +25,13 @@ bytes32 public constant MODIFY_CURVE_PERMISSION_ID = keccak256("MODIFY_CURVE_PER
 ```
 
 
+### SEED_PERMISSION_ID
+
+```solidity
+bytes32 public constant SEED_PERMISSION_ID = keccak256("SEED_PERMISSION");
+```
+
+
 ## Functions
 ### initialize
 
@@ -39,7 +46,6 @@ function initialize(
     address _owner,
     string memory _name,
     string memory _symbol,
-    uint256 _initialSupply,
     CurveParameters memory _curve
 ) external initializer;
 ```
@@ -51,7 +57,6 @@ function initialize(
 |`_owner`|`address`|The address of the owner of this contract.|
 |`_name`|`string`|The name of the token.|
 |`_symbol`|`string`|The symbol of the token.|
-|`_initialSupply`|`uint256`|The initial supply of the token.|
 |`_curve`|`CurveParameters`|The curve parameters for the token. This includes: {fundingRate} - The percentage of funds that go to the owner. Maximum value is 10000 (i.e., 100%). {exitFee} - The percentage of funds that are taken as fee when tokens are burned. Maximum value is 5000 (i.e., 50%). {reserveRatio} - The ratio for the reserve in the BancorBondingCurve. {curve} - The implementation of the bonding curve.|
 
 
@@ -74,4 +79,11 @@ function setGovernanceParameter(bytes32 what, bytes memory value) external auth(
 |`what`|`bytes32`|The name of the governance parameter to modify. Must be one of "fundingRate", "exitFee", or "owner".|
 |`value`|`bytes`|The new value for the specified governance parameter. Must be ABI-encoded before passing it to the function.|
 
+
+### openTrading
+
+
+```solidity
+function openTrading(address[] memory addresses, uint256[] memory amounts) external payable auth(SEED_PERMISSION_ID);
+```
 

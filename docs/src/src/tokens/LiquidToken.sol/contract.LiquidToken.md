@@ -1,5 +1,5 @@
 # LiquidToken
-[Git Source](https://github.com/DAObox/fantastic-spork/blob/417d39e05e02311e6212644ed1689713e91fc673/src/tokens/LiquidToken.sol)
+[Git Source](https://github.com/DAObox/fantastic-spork/blob/37171c98e431882ac7150395fb59a9c8f7e87ee4/src/tokens/LiquidToken.sol)
 
 **Inherits:**
 [LiquidBase](/src/tokens/LiquidBase.sol/abstract.LiquidBase.md)
@@ -26,13 +26,10 @@ Initializes the contract with the given parameters.
 
 
 ```solidity
-function initialize(
-    address _owner,
-    string memory _name,
-    string memory _symbol,
-    uint256 _initialSupply,
-    CurveParameters memory _curve
-) external payable initializer;
+function initialize(address _owner, string memory _name, string memory _symbol, CurveParameters memory _curve)
+    external
+    payable
+    initializer;
 ```
 **Parameters**
 
@@ -41,7 +38,6 @@ function initialize(
 |`_owner`|`address`|The address of the contract owner.|
 |`_name`|`string`|The name of the token.|
 |`_symbol`|`string`|The symbol of the token.|
-|`_initialSupply`|`uint256`|The initial supply of tokens.|
 |`_curve`|`CurveParameters`|The bonding curve parameters for the token.|
 
 
@@ -64,4 +60,11 @@ function setGovernance(bytes32 what, bytes memory value) external;
 |`what`|`bytes32`|The name of the governance parameter to modify. Must be one of "fundingRate", "exitFee", or "owner".|
 |`value`|`bytes`|The new value for the specified governance parameter. Must be ABI-encoded before passing it to the function.|
 
+
+### openTrading
+
+
+```solidity
+function openTrading(address[] memory addresses, uint256[] memory amounts) external payable;
+```
 
