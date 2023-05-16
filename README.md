@@ -5,17 +5,15 @@
 
 
 
-a governance protocol designed to empower creatives and commintites by coordinating incentive alignment with their stakeholders. Drawing heavy inspiration from [Continuous Organizations](https://github.com/C-ORG/whitepaper#challenges), our protocol introduces a model for DAOs by merging token bonding curves, market making, governance into a single, cohesive entity.
+A governance protocol designed to empower creatives and commintites by coordinating incentive alignment with their stakeholders. Drawing heavy inspiration from [Continuous Organizations](https://github.com/C-ORG/whitepaper#challenges), our protocol introduces a model for DAOs by merging token bonding curves, market making, governance into a single, cohesive entity.
 
 At its core, the Liquid Protocol facilitates the creation of Continuous Organizations, entities that operate with continuous financing and strong stakeholder alignment, all underpinned by a unique native token. This token, apart from serving as a store of value, also confers governance rights in the associated DAO, creating a harmonious feedback loop between financial and decision-making power.
 
-The protocol enables any inderviduals or associan to set up a continuous funding mechanism and maintain a liquidity pool of orgnisations native asset, regardless of the size of its market. This mechanism aligns the financial interests of all stakeholders - founders, employees, investors, and the broader community.
+The protocol enables any individual or association to set up a continuous funding mechanism and maintain a liquidity pool of organizations native asset, regardless of the size of its market. This mechanism aligns the financial interests of all stakeholders - founders, employees, investors, and the broader community.
 
 In essence, Liquid Protocol paves the way for a new wave of DAOs where stakeholders can invest in an organization at any given time, capture the value they help generate, and where their financial and decision-making interests are fully aligned with the success of the organization.
 
 This repo contains the smart contracts, interfaces, and libraries that underpin Liquid Protocol. We invite you to explore the protocol, interact with the codebase, and join us in our journey towards redefining organizational structures for the decentralized world. Your contributions are more than welcome.
-
-<br>
 
 ## Blueprint
 
