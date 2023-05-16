@@ -8,3 +8,4 @@ forge-std/=lib/forge-std/src/
 openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/
 openzeppelin-contracts/=lib/openzeppelin-contracts/
 osx/=lib/osx/
+prb-test/=lib/prb-test/src/

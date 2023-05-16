@@ -2,5 +2,5 @@
 
 # Contents
 - [utils](/src/test/utils)
-- [BaseSetup](BaseSetup.t.sol/contract.BaseSetup.md)
-- [LiquidTokenTest](PersonalToken.t.sol/contract.LiquidTokenTest.md)
+- [SetupVesting](SetupVesting.t.sol/contract.SetupVesting.md)
+- [VestingTest](Vesting.t.sol/contract.VestingTest.md)

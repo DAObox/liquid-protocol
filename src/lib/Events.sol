@@ -37,4 +37,11 @@ library Events {
      * @param burnAmount The amount of tokens that were burned.
      */
     event SponsoredBurn(address indexed sender, uint256 burnAmount);
+
+    /**
+     * @dev Emitted when the MarketMaker has been Hatched.
+     * @param hatcher The address of the account recieved the hatch tokens.
+     * @param amount The amount of bonded tokens that was minted to the hatcher.
+     */
+    event Hatch(address indexed hatcher, uint256 amount);
 }

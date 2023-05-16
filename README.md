@@ -20,22 +20,31 @@ This repo contains the smart contracts, interfaces, and libraries that underpin 
 ## Blueprint
 
 ```ml
-src
-├── curves
-│   └── BancorBondingCurve.sol
-├── interfaces
-│   └── IBondingCurve.sol
-├── lib
-│   ├── Errors.sol
-│   ├── Events.sol
-│   └── Types.sol
-├── math
-│   ├── BancorFormula.sol
-│   └── Power.sol
-└── tokens
-    ├── LiquidBase.sol
-    ├── LiquidToken.sol
-    └── LiquidTokenPlugin.sol
+└── src
+    ├── core
+    │   ├── ContinuousDaoSetup.sol
+    │   ├── GovernanceBurnableERC20.sol
+    │   ├── MarketMaker.sol
+    │   ├── SimpleHatch.sol
+    │   └── Vesting.sol
+    ├── interfaces
+    │   ├── IBondedToken.sol
+    │   ├── IBondingCurve.sol
+    │   └── IHatch.sol
+    ├── lib
+    │   ├── Errors.sol
+    │   ├── Events.sol
+    │   └── Types.sol
+    ├── math
+    │   ├── BancorBondingCurve.sol
+    │   ├── BancorFormula.sol
+    │   └── Power.sol
+    ├── mocks
+    │   └── MockBondedToken.sol
+    ├── modifiers
+        ├── MarketMaker.sol
+        ├── SimpleHatch.sol
+        └── Vesting.sol
 ```
 
 ## Development

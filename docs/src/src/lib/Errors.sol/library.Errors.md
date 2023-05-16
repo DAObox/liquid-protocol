@@ -1,5 +1,5 @@
 # Errors
-[Git Source](https://github.com/DAObox/fantastic-spork/blob/37171c98e431882ac7150395fb59a9c8f7e87ee4/src/lib/Errors.sol)
+[Git Source](https://github.com/DAObox/fantastic-spork/blob/e85e294b9aa197e65780cf42fd333d2b29d2cb82/src/lib/Errors.sol)
 
 
 ## Errors
@@ -121,5 +121,107 @@ Error thrown when addresses and values provided are not equal.
 
 ```solidity
 error AddressesAmountMismatch(uint256 addresses, uint256 values);
+```
+
+### AddressCannotBeZero
+
+```solidity
+error AddressCannotBeZero();
+```
+
+### InvalidPPMValue
+
+```solidity
+error InvalidPPMValue(uint32 value);
+```
+
+### HatchingNotStarted
+
+```solidity
+error HatchingNotStarted();
+```
+
+### HatchingAlreadyStarted
+
+```solidity
+error HatchingAlreadyStarted();
+```
+
+### HatchNotOpen
+
+```solidity
+error HatchNotOpen();
+```
+
+### VestingScheduleNotInitialized
+
+```solidity
+error VestingScheduleNotInitialized();
+```
+
+### VestingScheduleRevoked
+
+```solidity
+error VestingScheduleRevoked();
+```
+
+### VestingScheduleNotRevocable
+
+```solidity
+error VestingScheduleNotRevocable();
+```
+
+### OnlyBeneficiary
+
+```solidity
+error OnlyBeneficiary(address caller, address beneficiary);
+```
+
+### NotEnoughVestedTokens
+
+```solidity
+error NotEnoughVestedTokens(uint256 requested, uint256 available);
+```
+
+### DurationCannotBeZero
+
+```solidity
+error DurationCannotBeZero();
+```
+
+### SlicePeriodCannotBeZero
+
+```solidity
+error SlicePeriodCannotBeZero();
+```
+
+### DurationCannotBeLessThanCliff
+
+```solidity
+error DurationCannotBeLessThanCliff();
+```
+
+### ContributionWindowClosed
+
+```solidity
+error ContributionWindowClosed();
+```
+
+### MaxContributionReached
+
+```solidity
+error MaxContributionReached();
+```
+
+### HatchNotCanceled
+
+```solidity
+error HatchNotCanceled();
+```
+
+### NoContribution
+
+```solidity
+error NoContribution();
 ```
 

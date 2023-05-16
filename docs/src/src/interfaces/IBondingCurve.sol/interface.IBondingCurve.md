@@ -1,5 +1,5 @@
 # IBondingCurve
-[Git Source](https://github.com/DAObox/fantastic-spork/blob/37171c98e431882ac7150395fb59a9c8f7e87ee4/src/interfaces/IBondingCurve.sol)
+[Git Source](https://github.com/DAObox/fantastic-spork/blob/e85e294b9aa197e65780cf42fd333d2b29d2cb82/src/interfaces/IBondingCurve.sol)
 
 **Author:**
 DAOBox | (@pythonpete32)

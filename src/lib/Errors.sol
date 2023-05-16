@@ -60,4 +60,38 @@ library Errors {
     /// @param addresses The number of addresses provided.
     /// @param values The number of values provided.
     error AddressesAmountMismatch(uint256 addresses, uint256 values);
+
+    error AddressCannotBeZero();
+
+    error InvalidPPMValue(uint32 value);
+
+    error HatchingNotStarted();
+
+    error HatchingAlreadyStarted();
+
+    error HatchNotOpen();
+
+    error VestingScheduleNotInitialized();
+
+    error VestingScheduleRevoked();
+
+    error VestingScheduleNotRevocable();
+
+    error OnlyBeneficiary(address caller, address beneficiary);
+
+    error NotEnoughVestedTokens(uint256 requested, uint256 available);
+
+    error DurationCannotBeZero();
+
+    error SlicePeriodCannotBeZero();
+
+    error DurationCannotBeLessThanCliff();
+
+    error ContributionWindowClosed();
+
+    error MaxContributionReached();
+
+    error HatchNotCanceled();
+
+    error NoContribution();
 }

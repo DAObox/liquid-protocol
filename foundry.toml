@@ -7,11 +7,11 @@
 
 remappings = [
   "ds/=lib/ds-test/src/",
+  "prb-test/=lib/prb-test/src/",
   "@std=lib/forge-std/src/",
   "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts",
   "@aragon/=lib/osx/packages/contracts/src/",
   "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/"
-
 ]
 
 [profile.ci]
