@@ -1,39 +1,30 @@
 {
-  "name": "liquid-protocol",
+  "name": "@prb/foundry-template",
+  "description": "Foundry-based template for developing Solidity smart contracts",
   "version": "1.0.0",
-  "description": "Continuous Liquidity Protocol",
-  "directories": {
-    "lib": "lib"
+  "author": {
+    "name": "Paul Razvan Berg",
+    "url": "https://github.com/PaulRBerg"
   },
-  "scripts": {
-    "setup": "make clean && make build",
-    "sync": "make update",
-    "test": "make test",
-    "snapshot": "make snapshot",
-    "lint": "make lint"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/daobox/liquid-protocol.git"
+  "devDependencies": {
+    "prettier": "^2.8.7",
+    "solhint": "^3.4.0"
   },
   "keywords": [
+    "blockchain",
+    "ethereum",
     "forge",
-    "template",
-    "erc20",
-    "openzeppelin",
-    "Solidity",
-    "aragon",
-    "dao"
+    "foundry",
+    "smart-contracts",
+    "solidity",
+    "template"
   ],
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/daobox/liquid-protocol/issues"
-  },
-  "homepage": "https://github.com/daobox/liquid-protocol#readme",
-  "devDependencies": {
-    "prettier": "^2.6.2",
-    "prettier-plugin-solidity": "^1.0.0-beta.19",
-    "solhint": "^3.3.7",
-    "solhint-plugin-prettier": "^0.0.5"
+  "private": true,
+  "scripts": {
+    "clean": "rm -rf cache out",
+    "lint": "pnpm lint:sol && pnpm prettier:check",
+    "lint:sol": "forge fmt --check && pnpm solhint \"{script,src,test}/**/*.sol\"",
+    "prettier:check": "prettier --check \"**/*.{json,md,yml}\"",
+    "prettier:write": "prettier --write \"**/*.{json,md,yml}\""
   }
 }

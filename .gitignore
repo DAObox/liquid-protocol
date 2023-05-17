@@ -1,4 +1,17 @@
-cache/
-out/
-node_modules/
-.env
+# directories
+cache
+node_modules
+out
+
+# files
+*.env
+*.log
+.DS_Store
+.pnp.*
+lcov.info
+yarn.lock
+
+# broadcasts
+!broadcast
+broadcast/*
+broadcast/*/31337/

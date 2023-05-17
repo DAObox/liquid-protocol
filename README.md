@@ -1,96 +1,187 @@
-<img align="right" width="160" height="160" top="100" src="./assets/readme.png">
+# Foundry Template [![Open in Gitpod][gitpod-badge]][gitpod] [![Github Actions][gha-badge]][gha] [![Foundry][foundry-badge]][foundry] [![License: MIT][license-badge]][license]
 
-# Liquid Protocol • [![tests](https://github.com/daobox/liquid-protocol/actions/workflows/tests.yml/badge.svg)](https://github.com/daobox/liquid-protocol/actions/workflows/tests.yml) [![lints](https://github.com/daobox/liquid-protocol/actions/workflows/lints.yml/badge.svg)](https://github.com/daobox/liquid-protocol/actions/workflows/lints.yml) ![GitHub](https://img.shields.io/github/daobox/liquid-protocol/LICENCE) ![GitHub package.json version](https://img.shields.io/github/package-json/v/daobox/liquid-protocol/packageName)
+[gitpod]: https://gitpod.io/#https://github.com/PaulRBerg/foundry-template
+[gitpod-badge]: https://img.shields.io/badge/Gitpod-Open%20in%20Gitpod-FFB45B?logo=gitpod
+[gha]: https://github.com/PaulRBerg/foundry-template/actions
+[gha-badge]: https://github.com/PaulRBerg/foundry-template/actions/workflows/ci.yml/badge.svg
+[foundry]: https://getfoundry.sh/
+[foundry-badge]: https://img.shields.io/badge/Built%20with-Foundry-FFDB1C.svg
+[license]: https://opensource.org/licenses/MIT
+[license-badge]: https://img.shields.io/badge/License-MIT-blue.svg
 
+A Foundry-based template for developing Solidity smart contracts, with sensible defaults.
 
+## What's Inside
 
+- [Forge](https://github.com/foundry-rs/foundry/blob/master/forge): compile, test, fuzz, format, and deploy smart
+  contracts
+- [PRBTest](https://github.com/PaulRBerg/prb-test): modern collection of testing assertions and logging utilities
+- [Forge Std](https://github.com/foundry-rs/forge-std): collection of helpful contracts and cheatcodes for testing
+- [Solhint](https://github.com/protofire/solhint): linter for Solidity code
+- [Prettier Plugin Solidity](https://github.com/prettier-solidity/prettier-plugin-solidity): code formatter for
+  non-Solidity files
 
-a governance protocol designed to empower creatives and commintites by coordinating incentive alignment with their stakeholders. Drawing heavy inspiration from [Continuous Organizations](https://github.com/C-ORG/whitepaper#challenges), our protocol introduces a model for DAOs by merging token bonding curves, market making, governance into a single, cohesive entity.
+## Getting Started
 
-At its core, the Liquid Protocol facilitates the creation of Continuous Organizations, entities that operate with continuous financing and strong stakeholder alignment, all underpinned by a unique native token. This token, apart from serving as a store of value, also confers governance rights in the associated DAO, creating a harmonious feedback loop between financial and decision-making power.
+Click the [`Use this template`](https://github.com/PaulRBerg/foundry-template/generate) button at the top of the page to
+create a new repository with this repo as the initial state.
 
-The protocol enables any inderviduals or associan to set up a continuous funding mechanism and maintain a liquidity pool of orgnisations native asset, regardless of the size of its market. This mechanism aligns the financial interests of all stakeholders - founders, employees, investors, and the broader community.
+Or, if you prefer to install the template manually:
 
-In essence, Liquid Protocol paves the way for a new wave of DAOs where stakeholders can invest in an organization at any given time, capture the value they help generate, and where their financial and decision-making interests are fully aligned with the success of the organization.
-
-This repo contains the smart contracts, interfaces, and libraries that underpin Liquid Protocol. We invite you to explore the protocol, interact with the codebase, and join us in our journey towards redefining organizational structures for the decentralized world. Your contributions are more than welcome.
-
-<br>
-
-## Blueprint
-
-```ml
-└── src
-    ├── core
-    │   ├── ContinuousDaoSetup.sol
-    │   ├── GovernanceBurnableERC20.sol
-    │   ├── MarketMaker.sol
-    │   ├── SimpleHatch.sol
-    │   └── Vesting.sol
-    ├── interfaces
-    │   ├── IBondedToken.sol
-    │   ├── IBondingCurve.sol
-    │   └── IHatch.sol
-    ├── lib
-    │   ├── Errors.sol
-    │   ├── Events.sol
-    │   └── Types.sol
-    ├── math
-    │   ├── BancorBondingCurve.sol
-    │   ├── BancorFormula.sol
-    │   └── Power.sol
-    ├── mocks
-    │   └── MockBondedToken.sol
-    ├── modifiers
-        ├── MarketMaker.sol
-        ├── SimpleHatch.sol
-        └── Vesting.sol
+```sh
+forge init my-project --template https://github.com/PaulRBerg/foundry-template
+cd my-project
+pnpm install # install Solhint, Prettier, and other Node.js deps
 ```
 
-## Development
+If this is your first time with Foundry, check out the
+[installation](https://github.com/foundry-rs/foundry#installation) instructions.
 
-**Building**
+## Features
 
-```bash
-forge build
+This template builds upon the frameworks and libraries mentioned above, so for details about their specific features,
+please consult their respective documentation.
+
+For example, if you're interested in exploring Foundry in more detail, you should look at the
+[Foundry Book](https://book.getfoundry.sh/). In particular, you may be interested in reading the
+[Writing Tests](https://book.getfoundry.sh/forge/writing-tests.html) tutorial.
+
+### Sensible Defaults
+
+This template comes with a set of sensible default configurations for you to use. These defaults can be found in the
+following files:
+
+```text
+├── .editorconfig
+├── .gitignore
+├── .prettierignore
+├── .prettierrc.yml
+├── .solhint.json
+├── foundry.toml
+└── remappings.txt
 ```
 
-**Testing**
+### VSCode Integration
 
-```bash
-forge test -vvvvv
+This template is IDE agnostic, but for the best user experience, you may want to use it in VSCode alongside Nomic
+Foundation's [Solidity extension](https://marketplace.visualstudio.com/items?itemName=NomicFoundation.hardhat-solidity).
+
+For guidance on how to integrate a Foundry project in VSCode, please refer to this
+[guide](https://book.getfoundry.sh/config/vscode).
+
+### GitHub Actions
+
+This template comes with GitHub Actions pre-configured. Your contracts will be linted and tested on every push and pull
+request made to the `main` branch.
+
+You can edit the CI script in [.github/workflows/ci.yml](./.github/workflows/ci.yml).
+
+## Writing Tests
+
+To write a new test contract, you start by importing [PRBTest](https://github.com/PaulRBerg/prb-test) and inherit from
+it in your test contract. PRBTest comes with a pre-instantiated [cheatcodes](https://book.getfoundry.sh/cheatcodes/)
+environment accessible via the `vm` property. If you would like to view the logs in the terminal output you can add the
+`-vvv` flag and use [console.log](https://book.getfoundry.sh/faq?highlight=console.log#how-do-i-use-consolelog).
+
+This template comes with an example test contract [Foo.t.sol](./test/Foo.t.sol)
+
+## Usage
+
+This is a list of the most frequently needed commands.
+
+### Build
+
+Build the contracts:
+
+```sh
+$ forge build
 ```
 
+### Clean
 
+Delete the build artifacts and cache directories:
 
-### First time with Forge/Foundry?
-
-See the official Foundry installation [instructions](https://github.com/gakonst/foundry/blob/master/README.md#installation).
-
-Then, install the [foundry](https://github.com/gakonst/foundry) toolchain installer (`foundryup`) with:
-
-```bash
-curl -L https://foundry.paradigm.xyz | bash
+```sh
+$ forge clean
 ```
 
-Now that you've installed the `foundryup` binary,
-anytime you need to get the latest `forge` or `cast` binaries,
-you can run `foundryup`.
+### Compile
 
-So, simply execute:
+Compile the contracts:
 
-```bash
-foundryup
+```sh
+$ forge build
 ```
 
-🎉 Foundry is installed! 🎉
+### Coverage
 
+Get a test coverage report:
+
+```sh
+$ forge coverage
+```
+
+### Deploy
+
+Deploy to Anvil:
+
+```sh
+$ forge script script/Deploy.s.sol --broadcast --fork-url http://localhost:8545
+```
+
+For this script to work, you need to have a `MNEMONIC` environment variable set to a valid
+[BIP39 mnemonic](https://iancoleman.io/bip39/).
+
+For instructions on how to deploy to a testnet or mainnet, check out the
+[Solidity Scripting](https://book.getfoundry.sh/tutorials/solidity-scripting.html) tutorial.
+
+### Format
+
+Format the contracts:
+
+```sh
+$ forge fmt
+```
+
+### Gas Usage
+
+Get a gas report:
+
+```sh
+$ forge test --gas-report
+```
+
+### Lint
+
+Lint the contracts:
+
+```sh
+$ pnpm lint
+```
+
+### Test
+
+Run the tests:
+
+```sh
+$ forge test
+```
+
+## Notes
+
+1. Foundry uses [git submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules) to manage dependencies. For
+   detailed instructions on working with dependencies, please refer to the
+   [guide](https://book.getfoundry.sh/projects/dependencies.html) in the book
+2. You don't have to create a `.env` file, but filling in the environment variables may be useful when debugging and
+   testing against a fork.
+
+## Related Efforts
+
+- [abigger87/femplate](https://github.com/abigger87/femplate)
+- [cleanunicorn/ethereum-smartcontract-template](https://github.com/cleanunicorn/ethereum-smartcontract-template)
+- [foundry-rs/forge-template](https://github.com/foundry-rs/forge-template)
+- [FrankieIsLost/forge-template](https://github.com/FrankieIsLost/forge-template)
 
 ## License
 
-[MIT](https://github.com/daobox/liquid-protocol/blob/master/LICENSE)
-
-
-## Disclaimer
-
-> The Protocol is a work in progress, subject to change, and provided "AS IS", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and non-infringement. In no event shall the authors or copyright holders be liable for any claim, damages, or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the software or the use or other dealings in the software. All use of this protocol and deployment of these smart contracts are at the user's own risk. Users should ensure they comply with all laws and regulations in their respective jurisdictions before using or deploying these contracts. The creators and contributors to this protocol are not responsible for any losses or damages incurred as a result of using or deploying these contracts.
+This project is licensed under MIT.
