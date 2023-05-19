@@ -25,6 +25,8 @@ import { MockUSDC } from "../src/mocks/MockUSDC.sol";
 contract DAOParams {
     uint32 internal RATIO = 10 ** 4;
     uint64 internal ONE_DAY = 86_400;
+    bytes internal EMPTY_BYTES = "";
+    uint256 internal TOKEN = 10 ** 18;
 
     MajorityVotingBase.VotingSettings internal votingSettings = MajorityVotingBase.VotingSettings({
         votingMode: MajorityVotingBase.VotingMode.Standard,
@@ -48,7 +50,7 @@ contract IntegrationBase is DAOParams, PRBTest, StdCheats {
     PluginRepoFactory internal repoFactory;
     ContinuousDaoSetup internal continuousSetup;
     PluginRepo internal continuousRepo;
-    IERC20 internal externalToken;
+    MockUSDC internal externalToken;
     IBondingCurve internal bondingCurve;
     CurveParameters internal curveParams;
     DAOFactory.PluginSettings[] internal pluginSettings;
@@ -57,6 +59,7 @@ contract IntegrationBase is DAOParams, PRBTest, StdCheats {
     MarketMaker internal marketMaker;
     GovernanceBurnableERC20 internal governanceToken;
     TokenVoting internal voting;
+    address internal hatchAdmin;
 
     function setUp() public virtual {
         setupRepo();
@@ -79,7 +82,7 @@ contract IntegrationBase is DAOParams, PRBTest, StdCheats {
 
     function deployContracts() public {
         bondingCurve = IBondingCurve(new BancorBondingCurve());
-        externalToken = IERC20(address(new MockUSDC()));
+        externalToken = new MockUSDC();
         curveParams = CurveParameters({ theta: 250_000, friction: 5000, reserveRatio: 300_000, formula: bondingCurve });
     }
 
@@ -90,23 +93,24 @@ contract IntegrationBase is DAOParams, PRBTest, StdCheats {
                     versionTag: PluginRepo.Tag({ release: 1, build: 1 }),
                     pluginSetupRepo: continuousRepo
                 }),
-                data: abi.encode("Continuous DAO", "CDAO", externalToken, votingSettings, curveParams)
+                data: abi.encode("Continuous DAO", "CDAO", externalToken, votingSettings, curveParams, address(this))
             })
         );
 
         vm.recordLogs();
 
         dao = daoFactory.createDao(daoSettings, pluginSettings);
-        console2.log("DAO: %s", address(dao));
+
         Vm.Log[] memory entries = Vm(address(vm)).getRecordedLogs();
 
         for (uint256 i = 0; i < entries.length; i++) {
-            if (entries[i].topics[0] == keccak256("DeployedContracts(address,address,address)")) {
-                (address _tokenVoting, address _token, address _marketMaker) =
-                    abi.decode(entries[i].data, (address, address, address));
+            if (entries[i].topics[0] == keccak256("DeployedContracts(address,address,address,address)")) {
+                (address _tokenVoting, address _token, address _marketMaker, address _hatchAdmin) =
+                    abi.decode(entries[i].data, (address, address, address, address));
                 marketMaker = MarketMaker(_marketMaker);
                 governanceToken = GovernanceBurnableERC20(_token);
                 voting = TokenVoting(_tokenVoting);
+                hatchAdmin = _hatchAdmin;
             }
         }
     }

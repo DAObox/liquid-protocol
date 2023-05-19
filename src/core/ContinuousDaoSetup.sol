@@ -30,7 +30,7 @@ contract ContinuousDaoSetup is PluginSetup {
 
     address private immutable marketMakerBase;
 
-    event DeployedContracts(address tokenVoting, address governanceERC20, address marketMaker);
+    event DeployedContracts(address tokenVoting, address governanceERC20, address marketMaker, address hatchAdmin);
 
     /// @notice The contract constructor, that deploys the bases.
     constructor() {
@@ -54,7 +54,8 @@ contract ContinuousDaoSetup is PluginSetup {
             MajorityVotingBase.VotingSettings memory votingSettings,
             // HatchDeploymentInfo memory hatchInfo,
             // VestingSchedule memory schedule,
-            CurveParameters memory curve
+            CurveParameters memory curve,
+            address hatchAdmin
         ) = abi.decode(
             _data,
             (
@@ -64,7 +65,8 @@ contract ContinuousDaoSetup is PluginSetup {
                 MajorityVotingBase.VotingSettings,
                 // HatchDeploymentInfo,
                 // VestingSchedule,
-                CurveParameters
+                CurveParameters,
+                address
             )
         );
 
@@ -73,7 +75,7 @@ contract ContinuousDaoSetup is PluginSetup {
         // adding addresses directly into the helpers array to get around the stack limit
         helpers[0] = governanceERC20Base.clone();
         helpers[1] = marketMakerBase.clone();
-        helpers[2] = msg.sender; // hatchBase.clone();
+        helpers[2] = hatchAdmin; // hatchBase.clone();
 
         GovernanceBurnableERC20(helpers[0]).initialize(IDAO(_dao), name, symbol);
         MarketMaker(helpers[1]).initialize(IDAO(_dao), IBondedToken(helpers[0]), IERC20(externalToken), curve);
@@ -98,7 +100,7 @@ contract ContinuousDaoSetup is PluginSetup {
             abi.encodeWithSelector(TokenVoting.initialize.selector, _dao, votingSettings, helpers[0])
         );
 
-        emit DeployedContracts(plugin, helpers[0], helpers[1]);
+        emit DeployedContracts(plugin, helpers[0], helpers[1], helpers[2]);
 
         // Prepare permissions
         PermissionLib.MultiTargetPermission[] memory permissions = new PermissionLib.MultiTargetPermission[](6);
@@ -140,7 +142,7 @@ contract ContinuousDaoSetup is PluginSetup {
         // MatketMaker Permission
         permissions[4] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Grant,
-            helpers[0], // Token
+            helpers[1], // MarketMaker
             helpers[2], // Hatch
             PermissionLib.NO_CONDITION,
             MarketMaker(helpers[1]).HATCH_PERMISSION_ID()
