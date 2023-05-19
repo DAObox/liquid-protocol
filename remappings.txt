@@ -1,3 +1,4 @@
+@ensdomains/ens-contracts/=lib/ens-contracts/
 @aragon/=lib/osx/packages/contracts/src/
 @openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/
 @openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/

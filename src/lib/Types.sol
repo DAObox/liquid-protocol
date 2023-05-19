@@ -1,24 +1,26 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.0;
+pragma solidity >=0.8.17;
 
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {IVotes} from "@openzeppelin/contracts/governance/utils/IVotes.sol";
-import {MarketMaker} from "../core/MarketMaker.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { IVotes } from "@openzeppelin/contracts/governance/utils/IVotes.sol";
+import { MarketMaker } from "../core/MarketMaker.sol";
 
-import {IBondingCurve} from "../interfaces/IBondingCurve.sol";
+import { IBondingCurve } from "../interfaces/IBondingCurve.sol";
 
 /// @notice This struct holds the key parameters that define a bonding curve for a token.
 /// @dev These parameters can be updated over time to change the behavior of the bonding curve.
 struct CurveParameters {
     /// @notice  fraction of buy funds that go to the DAO.
     /// @dev This value is represented in  fraction (in PPM)
-    /// The funds collected here could be used for various purposes like development, marketing, etc., depending on the DAO's decisions.
+    /// The funds collected here could be used for various purposes like development, marketing, etc., depending on the
+    /// DAO's decisions.
     uint32 theta;
     /// @notice  fraction of sell funds that are redistributed to the Pool.
     /// @dev This value is represented in fraction (in PPM)
     /// This "friction" is used to discourage burning and maintain stability in the token's price.
     uint32 friction;
-    /// @notice The reserve ratio of the bonding curve, represented in parts per million (ppm), ranging from 1 to 1,000,000.
+    /// @notice The reserve ratio of the bonding curve, represented in parts per million (ppm), ranging from 1 to
+    /// 1,000,000.
     /// @dev The reserve ratio corresponds to different formulas in the bonding curve:
     ///      - 1/3 corresponds to y = multiple * x^2 (exponential curve)
     ///      - 1/2 corresponds to y = multiple * x (linear curve)
@@ -67,6 +69,13 @@ enum HatchStatus {
     OPEN,
     HATCHED,
     CANCELED
+}
+
+struct HatchDeploymentInfo {
+    uint256 initialPrice;
+    uint256 minimumRaise;
+    uint256 maximumRaise;
+    uint256 hatchDeadline;
 }
 
 struct HatchParameters {

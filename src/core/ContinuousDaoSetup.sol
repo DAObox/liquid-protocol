@@ -1,21 +1,21 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.17;
+pragma solidity >=0.8.17;
 
-import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
-import {Address} from "@openzeppelin/contracts/utils/Address.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {PluginSetup, IPluginSetup} from "@aragon/framework/plugin/setup/PluginSetup.sol";
-import {PermissionLib} from "@aragon/core/permission/PermissionLib.sol";
-import {TokenVoting} from "@aragon/plugins/governance/majority-voting/token/TokenVoting.sol";
-import {MajorityVotingBase} from "@aragon/plugins/governance/majority-voting/MajorityVotingBase.sol";
-import {IDAO} from "@aragon/core/plugin/PluginCloneable.sol";
-import {DAO} from "@aragon/core/dao/DAO.sol";
-import {MarketMaker} from "./MarketMaker.sol";
-import {SimpleHatch} from "./SimpleHatch.sol";
-import {GovernanceBurnableERC20} from "./GovernanceBurnableERC20.sol";
-import {VestingSchedule, HatchParameters, CurveParameters} from "../lib/Types.sol";
-import {IBondedToken} from "../interfaces/IBondedToken.sol";
+import { Clones } from "@openzeppelin/contracts/proxy/Clones.sol";
+import { Address } from "@openzeppelin/contracts/utils/Address.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { PluginSetup, IPluginSetup } from "@aragon/framework/plugin/setup/PluginSetup.sol";
+import { PermissionLib } from "@aragon/core/permission/PermissionLib.sol";
+import { TokenVoting } from "@aragon/plugins/governance/majority-voting/token/TokenVoting.sol";
+import { MajorityVotingBase } from "@aragon/plugins/governance/majority-voting/MajorityVotingBase.sol";
+import { IDAO } from "@aragon/core/plugin/PluginCloneable.sol";
+import { DAO } from "@aragon/core/dao/DAO.sol";
+import { MarketMaker } from "./MarketMaker.sol";
+import { SimpleHatch } from "./SimpleHatch.sol";
+import { GovernanceBurnableERC20 } from "./GovernanceBurnableERC20.sol";
+import { VestingSchedule, HatchParameters, HatchStatus, HatchDeploymentInfo, CurveParameters } from "../lib/Types.sol";
+import { IBondedToken } from "../interfaces/IBondedToken.sol";
 
 contract ContinuousDaoSetup is PluginSetup {
     using Address for address;
@@ -30,6 +30,8 @@ contract ContinuousDaoSetup is PluginSetup {
 
     address private immutable marketMakerBase;
 
+    event DeployedContracts(address tokenVoting, address governanceERC20, address marketMaker);
+
     /// @notice The contract constructor, that deploys the bases.
     constructor() {
         tokenVotingBase = address(new TokenVoting());
@@ -38,7 +40,10 @@ contract ContinuousDaoSetup is PluginSetup {
         marketMakerBase = address(new MarketMaker());
     }
 
-    function prepareInstallation(address _dao, bytes calldata _data)
+    function prepareInstallation(
+        address _dao,
+        bytes calldata _data
+    )
         external
         returns (address plugin, PreparedSetupData memory preparedSetupData)
     {
@@ -47,8 +52,8 @@ contract ContinuousDaoSetup is PluginSetup {
             string memory symbol,
             address externalToken,
             MajorityVotingBase.VotingSettings memory votingSettings,
-            HatchParameters memory hatchParameters,
-            VestingSchedule memory schedule,
+            // HatchDeploymentInfo memory hatchInfo,
+            // VestingSchedule memory schedule,
             CurveParameters memory curve
         ) = abi.decode(
             _data,
@@ -57,8 +62,8 @@ contract ContinuousDaoSetup is PluginSetup {
                 string,
                 address,
                 MajorityVotingBase.VotingSettings,
-                HatchParameters,
-                VestingSchedule,
+                // HatchDeploymentInfo,
+                // VestingSchedule,
                 CurveParameters
             )
         );
@@ -68,16 +73,32 @@ contract ContinuousDaoSetup is PluginSetup {
         // adding addresses directly into the helpers array to get around the stack limit
         helpers[0] = governanceERC20Base.clone();
         helpers[1] = marketMakerBase.clone();
-        helpers[2] = hatchBase.clone();
+        helpers[2] = msg.sender; // hatchBase.clone();
 
         GovernanceBurnableERC20(helpers[0]).initialize(IDAO(_dao), name, symbol);
         MarketMaker(helpers[1]).initialize(IDAO(_dao), IBondedToken(helpers[0]), IERC20(externalToken), curve);
-        SimpleHatch(helpers[2]).initialize(IDAO(_dao), hatchParameters, schedule);
+        // SimpleHatch(helpers[2]).initialize(
+        //     IDAO(_dao),
+        //     new HatchParameters({
+        //     externalToken: IERC20(externalToken),
+        //     bondedToken: helpers[0],
+        //     pool: helpers[1],
+        //     initialPrice: hatchInfo.initialPrice,
+        //     raised: 0,
+        //     minimumRaise: hatchInfo.minimumRaise,
+        //     maximumRaise: hatchInfo.maximumRaise,
+        //     hatchDeadline: hatchInfo.hatchDeadline,
+        //     status: HatchStatus.OPEN
+        //     }),
+        //     schedule
+        // );
 
         plugin = createERC1967Proxy(
             address(tokenVotingBase),
             abi.encodeWithSelector(TokenVoting.initialize.selector, _dao, votingSettings, helpers[0])
         );
+
+        emit DeployedContracts(plugin, helpers[0], helpers[1]);
 
         // Prepare permissions
         PermissionLib.MultiTargetPermission[] memory permissions = new PermissionLib.MultiTargetPermission[](6);
@@ -137,11 +158,14 @@ contract ContinuousDaoSetup is PluginSetup {
         preparedSetupData.permissions = permissions;
     }
 
-    function prepareUninstallation(address _dao, SetupPayload calldata _payload)
+    function prepareUninstallation(
+        address _dao,
+        SetupPayload calldata _payload
+    )
         external
         view
         returns (PermissionLib.MultiTargetPermission[] memory permissions)
-    {}
+    { }
 
     function implementation() external view virtual override returns (address) {
         return address(tokenVotingBase);

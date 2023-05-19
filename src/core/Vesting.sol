@@ -2,20 +2,23 @@
 pragma solidity >= 0.8.17;
 
 // OpenZeppelin dependencies
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import {IVotes} from "@openzeppelin/contracts/governance/utils/IVotes.sol";
-import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import { IVotes } from "@openzeppelin/contracts/governance/utils/IVotes.sol";
+import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
-import {Errors} from "../lib/Errors.sol";
-import {VestingSchedule} from "../lib/Types.sol";
-import {Modifiers} from "../modifiers/Vesting.sol";
+import { Errors } from "../lib/Errors.sol";
+import { VestingSchedule } from "../lib/Types.sol";
+import { Modifiers } from "../modifiers/Vesting.sol";
 
 /**
  * @title Vesting
  * @author DAOBox | (@pythonpete32)
- * @dev This contract enables vesting of tokens over a certain period of time. It is upgradeable and protected against reentrancy attacks.
- *      The contract allows an admin to initialize the vesting schedule and the beneficiary of the vested tokens. Once the vesting starts, the beneficiary
- *      can claim the releasable tokens at any time. If the vesting is revocable, the admin can revoke the remaining tokens and send them to a specified address.
+ * @dev This contract enables vesting of tokens over a certain period of time. It is upgradeable and protected against
+ * reentrancy attacks.
+ *      The contract allows an admin to initialize the vesting schedule and the beneficiary of the vested tokens. Once
+ * the vesting starts, the beneficiary
+ *      can claim the releasable tokens at any time. If the vesting is revocable, the admin can revoke the remaining
+ * tokens and send them to a specified address.
  *      The beneficiary can also delegate their voting power to another address.
  *
  * @notice The contract uses the ERC20 and IVotes interfaces, please understand these before using this contract.
@@ -48,7 +51,12 @@ contract Vesting is ReentrancyGuardUpgradeable, Modifiers {
      * @param token_ The address of the token
      * @param schedule_ The vesting schedule
      */
-    function initialize(address admin_, address beneficiary_, address token_, VestingSchedule memory schedule_)
+    function initialize(
+        address admin_,
+        address beneficiary_,
+        address token_,
+        VestingSchedule memory schedule_
+    )
         external
         initializer
         validateInitialize(beneficiary_, token_, schedule_)

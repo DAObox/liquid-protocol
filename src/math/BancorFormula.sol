@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: Apache 2.0
+
+// solhint-disable-next-line compiler-version
 pragma solidity >=0.6.0 <0.9.0;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
@@ -13,10 +15,11 @@ import "./Power.sol"; // Efficient power function.
 contract BancorFormula is Power {
     using SafeMath for uint256;
 
-    uint32 private constant MAX_RESERVE_RATIO = 1000000;
+    uint32 private constant MAX_RESERVE_RATIO = 1_000_000;
 
     /**
-     * @dev given a continuous token supply, reserve token balance, reserve ratio, and a deposit amount (in the reserve token),
+     * @dev given a continuous token supply, reserve token balance, reserve ratio, and a deposit amount (in the reserve
+     * token),
      * calculates the return for a given conversion (in the continuous token)
      *
      * Formula:
@@ -34,7 +37,11 @@ contract BancorFormula is Power {
         uint256 _reserveBalance,
         uint32 _reserveRatio,
         uint256 _depositAmount
-    ) public view returns (uint256) {
+    )
+        public
+        view
+        returns (uint256)
+    {
         // validate input
         require(
             _supply > 0 && _reserveBalance > 0 && _reserveRatio > 0 && _reserveRatio <= MAX_RESERVE_RATIO,
@@ -57,7 +64,8 @@ contract BancorFormula is Power {
     }
 
     /**
-     * @dev given a continuous token supply, reserve token balance, reserve ratio and a sell amount (in the continuous token),
+     * @dev given a continuous token supply, reserve token balance, reserve ratio and a sell amount (in the continuous
+     * token),
      * calculates the return for a given conversion (in the reserve token)
      *
      * Formula:
@@ -70,7 +78,12 @@ contract BancorFormula is Power {
      *
      * @return sale return amount
      */
-    function calculateSaleReturn(uint256 _supply, uint256 _reserveBalance, uint32 _reserveRatio, uint256 _sellAmount)
+    function calculateSaleReturn(
+        uint256 _supply,
+        uint256 _reserveBalance,
+        uint32 _reserveRatio,
+        uint256 _sellAmount
+    )
         public
         view
         returns (uint256)

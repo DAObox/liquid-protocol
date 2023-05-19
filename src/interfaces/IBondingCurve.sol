@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.0;
+pragma solidity >=0.8.17;
 
 /**
  * @title IBondingCurve
@@ -23,7 +23,10 @@ interface IBondingCurve {
         uint256 _continuousSupply,
         uint256 _reserveBalance,
         uint32 _reserveRatio
-    ) external view returns (uint256);
+    )
+        external
+        view
+        returns (uint256);
 
     /**
      * @notice Calculates the amount of reserve tokens that can be refunded for a given amount of continuous tokens.
@@ -39,5 +42,8 @@ interface IBondingCurve {
         uint256 _continuousSupply,
         uint256 _reserveBalance,
         uint32 _reserveRatio
-    ) external view returns (uint256);
+    )
+        external
+        view
+        returns (uint256);
 }

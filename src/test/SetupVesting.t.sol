@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13;
+pragma solidity >=0.8.17;
 
-import {IDAO} from "@aragon/core/plugin/PluginCloneable.sol";
+import { IDAO } from "@aragon/core/plugin/PluginCloneable.sol";
 
-import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
-import {Address} from "@openzeppelin/contracts/utils/Address.sol";
-import {console} from "forge-std/console.sol";
-import {stdStorage, StdStorage, Test} from "forge-std/Test.sol";
+import { Clones } from "@openzeppelin/contracts/proxy/Clones.sol";
+import { Address } from "@openzeppelin/contracts/utils/Address.sol";
+import { console } from "forge-std/console.sol";
+import { stdStorage, StdStorage, Test } from "forge-std/Test.sol";
 
-import {Utils} from "./utils/Utils.sol";
-import {Vesting} from "../core/Vesting.sol";
-import {MockBondedToken} from "../mocks/MockBondedToken.sol";
-import {VestingSchedule} from "../lib/Types.sol";
+import { Utils } from "./utils/Utils.sol";
+import { Vesting } from "../core/Vesting.sol";
+import { MockBondedToken } from "../mocks/MockBondedToken.sol";
+import { VestingSchedule } from "../lib/Types.sol";
 
 contract SetupVesting is Test {
     using Address for address;

@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.17;
 
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {IVotes} from "@openzeppelin/contracts/governance/utils/IVotes.sol";
-import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
-import {Address} from "@openzeppelin/contracts/utils/Address.sol";
-import {PluginCloneable, IDAO} from "@aragon/core/plugin/PluginCloneable.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { IVotes } from "@openzeppelin/contracts/governance/utils/IVotes.sol";
+import { Clones } from "@openzeppelin/contracts/proxy/Clones.sol";
+import { Address } from "@openzeppelin/contracts/utils/Address.sol";
+import { PluginCloneable, IDAO } from "@aragon/core/plugin/PluginCloneable.sol";
 
-import {MarketMaker} from "./MarketMaker.sol";
-import {Vesting} from "./Vesting.sol";
-import {Errors} from "../lib/Errors.sol";
-import {VestingSchedule, HatchStatus, HatchParameters} from "../lib/Types.sol";
-import {Modifiers} from "../modifiers/SimpleHatch.sol";
+import { MarketMaker } from "./MarketMaker.sol";
+import { Vesting } from "./Vesting.sol";
+import { Errors } from "../lib/Errors.sol";
+import { VestingSchedule, HatchStatus, HatchParameters } from "../lib/Types.sol";
+import { Modifiers } from "../modifiers/SimpleHatch.sol";
 
 // TODO
 contract SimpleHatch is PluginCloneable, Modifiers {
@@ -34,7 +34,11 @@ contract SimpleHatch is PluginCloneable, Modifiers {
         _vestingBase = address(new Vesting());
     }
 
-    function initialize(IDAO dao_, HatchParameters memory params_, VestingSchedule memory schedule_)
+    function initialize(
+        IDAO dao_,
+        HatchParameters memory params_,
+        VestingSchedule memory schedule_
+    )
         external
         initializer
     {

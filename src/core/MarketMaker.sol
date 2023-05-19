@@ -1,30 +1,36 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.0;
+pragma solidity >=0.8.17;
 
-import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {PluginCloneable, IDAO} from "@aragon/core/plugin/PluginCloneable.sol";
+import { SafeMath } from "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { PluginCloneable, IDAO } from "@aragon/core/plugin/PluginCloneable.sol";
 
-import {IBondingCurve} from "../interfaces/IBondingCurve.sol";
-import {IBondedToken} from "../interfaces/IBondedToken.sol";
+import { IBondingCurve } from "../interfaces/IBondingCurve.sol";
+import { IBondedToken } from "../interfaces/IBondedToken.sol";
 
-import {Errors} from "../lib/Errors.sol";
-import {Events} from "../lib/Events.sol";
-import {Modifiers} from "../modifiers/MarketMaker.sol";
-import {CurveParameters} from "../lib/Types.sol";
+import { Errors } from "../lib/Errors.sol";
+import { Events } from "../lib/Events.sol";
+import { Modifiers } from "../modifiers/MarketMaker.sol";
+import { CurveParameters } from "../lib/Types.sol";
 
 /**
  * @title DAO Market Maker with Adjustable Bonding Curve
  * @author DAOBox | (@pythonpete32)
  * @dev This contract is an non-upgradeable Aragon OSx Plugin
- *      It enables continuous minting and burning of tokens on an Augmented Bonding Curve, with part of the funds going to the DAO and the rest being added to a reserve.
- *      The adjustable bonding curve formula is provided at initialization and determines the reward for minting and the refund for burning.
- *      The DAO can also receive a sponsored mint, where another address pays to boost the reserve and the owner obtains the minted tokens.
- *      Users can also perform a sponsored burn, where they burn their own tokens to enhance the value of the remaining tokens.
+ *      It enables continuous minting and burning of tokens on an Augmented Bonding Curve, with part of the funds going
+ * to the DAO and the rest being added to a reserve.
+ *      The adjustable bonding curve formula is provided at initialization and determines the reward for minting and the
+ * refund for burning.
+ *      The DAO can also receive a sponsored mint, where another address pays to boost the reserve and the owner obtains
+ * the minted tokens.
+ *      Users can also perform a sponsored burn, where they burn their own tokens to enhance the value of the remaining
+ * tokens.
  *      The DAO can set certain governance parameters like the theta (funding rate), or friction(exit fee)
  *
- * @notice This contract uses several external contracts and libraries from OpenZeppelin. Please review and understand those before using this contract.
- * Also, consider the effects of the adjustable bonding curve and continuous minting/burning on your token's economics. Use this contract responsibly.
+ * @notice This contract uses several external contracts and libraries from OpenZeppelin. Please review and understand
+ * those before using this contract.
+ * Also, consider the effects of the adjustable bonding curve and continuous minting/burning on your token's economics.
+ * Use this contract responsibly.
  */
 contract MarketMaker is PluginCloneable, Modifiers {
     using SafeMath for uint256;
@@ -73,11 +79,17 @@ contract MarketMaker is PluginCloneable, Modifiers {
      * @param externalToken_ The external token used to purchace the bonded token.
      * @param curve_ The parameters for the curve_. This includes:
      *        {fundingRate} - The percentage of funds that go to the owner. Maximum value is 10000 (i.e., 100%).
-     *        {exitFee} - The percentage of funds that are taken as fee when tokens are burned. Maximum value is 5000 (i.e., 50%).
+     *        {exitFee} - The percentage of funds that are taken as fee when tokens are burned. Maximum value is 5000
+     * (i.e., 50%).
      *        {reserveRatio} - The ratio for the reserve in the BancorBondingCurve.
      *        {formula} - The implementation of the bonding curve_.
      */
-    function initialize(IDAO dao_, IBondedToken bondedToken_, IERC20 externalToken_, CurveParameters memory curve_)
+    function initialize(
+        IDAO dao_,
+        IBondedToken bondedToken_,
+        IERC20 externalToken_,
+        CurveParameters memory curve_
+    )
         external
         initializer
         nonZeroAddress(address(externalToken_))
@@ -97,7 +109,10 @@ contract MarketMaker is PluginCloneable, Modifiers {
         _curve.formula = curve_.formula;
     }
 
-    function hatch(address hatchTo, uint256 hatchAmount)
+    function hatch(
+        address hatchTo,
+        uint256 hatchAmount
+    )
         external
         validateReserve(_externalToken)
         preHatch(_hatched)
@@ -250,7 +265,8 @@ contract MarketMaker is PluginCloneable, Modifiers {
     }
 
     /**
-     * @notice Calculates and returns the amount of Ether that can be refunded by burning {_amount} Continuous Governance Token.
+     * @notice Calculates and returns the amount of Ether that can be refunded by burning {_amount} Continuous
+     * Governance Token.
      * @dev The price calculation is based on the current bonding _curve and reserve ratio.
      * @return uint The amount of Ether that can be refunded by burning {_amount} token.
      */

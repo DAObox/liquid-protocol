@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity >=0.8.17;
 
-import {BancorFormula} from "../math/BancorFormula.sol";
-import {IBondingCurve} from "../interfaces/IBondingCurve.sol";
+import { BancorFormula } from "../math/BancorFormula.sol";
+import { IBondingCurve } from "../interfaces/IBondingCurve.sol";
 
 /**
  * @title BancorBondingCurve
@@ -24,7 +24,11 @@ contract BancorBondingCurve is IBondingCurve, BancorFormula {
         uint256 _continuousSupply,
         uint256 _reserveBalance,
         uint32 _reserveRatio
-    ) public view returns (uint256) {
+    )
+        public
+        view
+        returns (uint256)
+    {
         return calculatePurchaseReturn(_continuousSupply, _reserveBalance, _reserveRatio, _reserveTokenAmount);
     }
 
@@ -34,7 +38,11 @@ contract BancorBondingCurve is IBondingCurve, BancorFormula {
         uint256 _continuousSupply,
         uint256 _reserveBalance,
         uint32 _reserveRatio
-    ) public view returns (uint256) {
+    )
+        public
+        view
+        returns (uint256)
+    {
         return calculateSaleReturn(_continuousSupply, _reserveBalance, _reserveRatio, _continuousTokenAmount);
     }
 }

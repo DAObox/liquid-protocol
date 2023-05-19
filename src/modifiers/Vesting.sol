@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.0;
+pragma solidity >=0.8.17;
 
-import {Errors} from "../lib/Errors.sol";
-import {VestingSchedule} from "../lib/Types.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { Errors } from "../lib/Errors.sol";
+import { VestingSchedule } from "../lib/Types.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 abstract contract Modifiers {
     /**
@@ -17,8 +17,10 @@ abstract contract Modifiers {
     }
 
     /**
-     * @dev This modifier checks if the caller is the owner and if the vesting schedule is revocable and not already revoked.
-     *      It reverts if the caller is not the owner, the vesting schedule is not revocable, or the vesting schedule is already revoked.
+     * @dev This modifier checks if the caller is the owner and if the vesting schedule is revocable and not already
+     * revoked.
+     *      It reverts if the caller is not the owner, the vesting schedule is not revocable, or the vesting schedule is
+     * already revoked.
      *
      * @param schedule The vesting schedule
      * @param owner The owner's address
@@ -53,8 +55,10 @@ abstract contract Modifiers {
     }
 
     /**
-     * @dev This modifier checks if the vesting schedule is initialized and not revoked, and if the requested amount is less than or equal to the releasable amount.
-     *      It reverts if the vesting schedule is not initialized or revoked, or if the requested amount is greater than the releasable amount.
+     * @dev This modifier checks if the vesting schedule is initialized and not revoked, and if the requested amount is
+     * less than or equal to the releasable amount.
+     *      It reverts if the vesting schedule is not initialized or revoked, or if the requested amount is greater than
+     * the releasable amount.
      *
      * @param requested The requested amount
      * @param releasable The releasable amount
@@ -64,7 +68,7 @@ abstract contract Modifiers {
         if (schedule.revoked == true) revert Errors.VestingScheduleRevoked();
         if (schedule.initialized == false) revert Errors.VestingScheduleNotInitialized();
         if (requested > releasable) {
-            revert Errors.NotEnoughVestedTokens({requested: requested, available: releasable});
+            revert Errors.NotEnoughVestedTokens({ requested: requested, available: releasable });
         }
         _;
     }

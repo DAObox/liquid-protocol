@@ -8,10 +8,10 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/draft-ERC20Pe
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+import { ERC165Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 
-import {DaoAuthorizableUpgradeable} from "@aragon/core/plugin/dao-authorizable/DaoAuthorizableUpgradeable.sol";
-import {IDAO} from "@aragon/core/dao/IDAO.sol";
+import { DaoAuthorizableUpgradeable } from "@aragon/core/plugin/dao-authorizable/DaoAuthorizableUpgradeable.sol";
+import { IDAO } from "@aragon/core/dao/IDAO.sol";
 
 contract GovernanceBurnableERC20 is
     Initializable,
@@ -44,7 +44,7 @@ contract GovernanceBurnableERC20 is
         _mint(to, amount);
     }
 
-    function _authorizeUpgrade(address newImplementation) internal override auth(UPGRADER_ROLE_ID) {}
+    function _authorizeUpgrade(address newImplementation) internal override auth(UPGRADER_ROLE_ID) { }
 
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
         return _interfaceId == type(IERC20Upgradeable).interfaceId
@@ -55,7 +55,11 @@ contract GovernanceBurnableERC20 is
 
     // https://forum.openzeppelin.com/t/self-delegation-in-erc20votes/17501/12?u=novaknole
     /// @inheritdoc ERC20VotesUpgradeable
-    function _afterTokenTransfer(address from, address to, uint256 amount)
+    function _afterTokenTransfer(
+        address from,
+        address to,
+        uint256 amount
+    )
         internal
         override(ERC20Upgradeable, ERC20VotesUpgradeable)
     {

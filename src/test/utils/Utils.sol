@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Unlicense
-pragma solidity >=0.8.0;
+pragma solidity >=0.8.17;
 
-import {Test} from "forge-std/Test.sol";
+import { Test } from "forge-std/Test.sol";
 
 contract Utils is Test {
     bytes32 internal nextUser = keccak256(abi.encodePacked("user address"));
@@ -17,7 +17,7 @@ contract Utils is Test {
         address payable[] memory users = new address payable[](userNum);
         for (uint256 i = 0; i < userNum; i++) {
             address payable user = this.getNextUserAddress();
-            vm.deal(user, 10000 ether);
+            vm.deal(user, 10_000 ether);
             users[i] = user;
         }
 
