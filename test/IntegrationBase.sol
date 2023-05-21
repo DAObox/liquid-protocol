@@ -5,6 +5,7 @@ import { PRBTest } from "@prb/test/PRBTest.sol";
 import { console2 } from "forge-std/console2.sol";
 import { StdCheats } from "forge-std/StdCheats.sol";
 import { Vm } from "forge-std/Vm.sol";
+import { Helpers } from "./utils/Helpers.sol";
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { TokenVoting } from "@aragon/plugins/governance/majority-voting/token/TokenVoting.sol";
@@ -45,7 +46,13 @@ contract DAOParams {
 }
 
 // NOTE: This should be run against a fork of mainnet
-contract IntegrationBase is DAOParams, PRBTest, StdCheats {
+contract IntegrationBase is DAOParams, Helpers {
+    // ----------------- AGENTS ------------------- //
+    address internal deployer;
+    address internal hatcher;
+    address internal alice;
+    address internal bob;
+
     DAOFactory internal daoFactory;
     PluginRepoFactory internal repoFactory;
     ContinuousDaoSetup internal continuousSetup;
@@ -62,22 +69,45 @@ contract IntegrationBase is DAOParams, PRBTest, StdCheats {
     address internal hatchAdmin;
 
     function setUp() public virtual {
+        createFork("mainnet", 17_307_419);
+        createAgents();
         setupRepo();
         deployContracts();
         deployDAO();
     }
 
+    function createFork(string memory network, uint256 blockNumber) public {
+        // Silently pass this test if there is no API key.
+
+        string memory alchemyApiKey = vm.envOr("API_KEY_ALCHEMY", string(""));
+        if (bytes(alchemyApiKey).length == 0) {
+            return;
+        }
+        // Otherwise, run the test against the mainnet fork.
+        vm.createSelectFork({ urlOrAlias: network, blockNumber: blockNumber });
+        console2.log("Curent Block: ", blockNumber);
+    }
+
+    function createAgents() public {
+        deployer = createNamedUser("deployer");
+        hatcher = createNamedUser("hatcher");
+        alice = createNamedUser("ALICE");
+        bob = createNamedUser("BOB");
+    }
+
     function setupRepo() public {
         daoFactory = DAOFactory(0xA03C2182af8eC460D498108C92E8638a580b94d4);
         repoFactory = PluginRepoFactory(0x96E54098317631641703404C06A5afAD89da7373);
+        vm.startPrank(deployer);
         continuousSetup = new ContinuousDaoSetup();
         continuousRepo = repoFactory.createPluginRepoWithFirstVersion({
             _subdomain: "continuous-dao",
             _pluginSetup: address(continuousSetup),
-            _maintainer: address(this),
+            _maintainer: address(deployer),
             _releaseMetadata: "0x00",
             _buildMetadata: "0x00"
         });
+        vm.stopPrank();
         vm.label(address(continuousRepo), "continuousRepo");
         vm.label(address(continuousSetup), "continuousSetup");
         vm.label(address(repoFactory), "repoFactory");
@@ -85,11 +115,16 @@ contract IntegrationBase is DAOParams, PRBTest, StdCheats {
     }
 
     function deployContracts() public {
+        vm.prank(deployer);
         bondingCurve = IBondingCurve(new BancorBondingCurve());
         externalToken = new MockUSDC();
         curveParams = CurveParameters({ theta: 250_000, friction: 5000, reserveRatio: 300_000, formula: bondingCurve });
         vm.label(address(bondingCurve), "bondingCurve");
         vm.label(address(externalToken), "USDC");
+
+        externalToken.mint(hatcher, 1_000_000 * TOKEN);
+        externalToken.mint(alice, 100_000 * TOKEN);
+        externalToken.mint(bob, 100_000 * TOKEN);
     }
 
     function deployDAO() public {
@@ -99,12 +134,13 @@ contract IntegrationBase is DAOParams, PRBTest, StdCheats {
                     versionTag: PluginRepo.Tag({ release: 1, build: 1 }),
                     pluginSetupRepo: continuousRepo
                 }),
-                data: abi.encode("Continuous DAO", "CDAO", externalToken, votingSettings, curveParams, address(this))
+                data: abi.encode("Continuous DAO", "CDAO", externalToken, votingSettings, curveParams, address(hatcher))
             })
         );
 
         vm.recordLogs();
 
+        vm.prank(deployer);
         dao = daoFactory.createDao(daoSettings, pluginSettings);
 
         Vm.Log[] memory entries = Vm(address(vm)).getRecordedLogs();

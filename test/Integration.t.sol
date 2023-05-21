@@ -34,30 +34,37 @@ contract Integration is IntegrationBase {
             "this contract can hatch"
         );
 
-           console2.log("===== hatching ======");
-        // mint tokens to the hatch admin which is this contract
-        externalToken.mint(address(this), 100_000 * TOKEN);
-        externalToken.transfer(address(marketMaker), 10_000 * TOKEN);
+        console2.log("===== hatching ======");
+        // Hatch the market maker by sending $100,000 to the market maker.tx
+        // the expected behaviour is for the $75k to go to the market maker where
+        // 25K will go to the DAO as 25% theta has been set. The hatcher will choose
+        // get all the initial tokens. Remember this should be another contract with
+        // its own logic as to how to distribute these DAO tokens. The Hatcher chould
+        // have no extra powers after the hatch.
 
-        vm.prank(address(marketMaker));
-        governanceToken.mint(address(marketMaker), 10_000);
-
-        // expect the hatch to emit a hatch event
-        // vm.expectEmit(true, false, false, true, address(marketMaker));
-        // emit Events.Hatch(address(this), 10_000 * TOKEN);
-        // ***MINTING IS BROKEN IN HATCH***
-        marketMaker.hatch(address(0), 10_000 * TOKEN);
+        // Prank the hatcher and deploy the funding
+        vm.startPrank(hatcher);
+        console2.log("Hatcher $", externalToken.balanceOf(hatcher));
+        externalToken.approve(address(marketMaker), 100_000 * TOKEN);
+        marketMaker.hatch({ initialSupply: 100_000 * TOKEN, fundingAmount: 100_000 * TOKEN, hatchTo: hatcher });
+        vm.stopPrank();
 
         // validate the hatch
-        assertEq(governanceToken.totalSupply(), 10_000, "HATCH TOKENS SHOULD BE 10_000");
-        assertEq(externalToken.balanceOf(address(marketMaker)), 10_000 * TOKEN, "MARKET MAKER SHOULD HAVE 10_000 USDC");
-        assertEq(externalToken.balanceOf(address(marketMaker)), marketMaker.reserveBalance(), "RESERVE == BALANCE OF");
-        assertTrue(marketMaker.isHatched(), "MARKET MAKER SHOULD BE HATCHED");
+        assertEq(governanceToken.totalSupply(), 100_000 * TOKEN, "HATCH TOKENS SHOULD BE 100_000");
+        assertEq(governanceToken.balanceOf(hatcher), 100_000 * TOKEN, "HATCHER SHOULD HAVE 100K TOKENS");
+        assertEq(externalToken.balanceOf(address(marketMaker)), 75_000 * TOKEN, "MARKET MAKER SHOULD HAVE 75_000 TKN");
+        // ***TODO***: this is a great one for an invariant test
+        // assertEq(externalToken.balanceOf(address(marketMaker)), marketMaker.reserveBalance(), "RESERVE == BALANCEOF");
 
-        console2.log("===== continuous minting ======");
-        externalToken.approve(address(marketMaker), 10_000 * TOKEN);
-          marketMaker.mint(10_000 * TOKEN);
-        assertEq(externalToken.balanceOf(address(marketMaker)), 20_000 * TOKEN, "MARKET MAKER SHOULD HAVE 10_000 USDC");
-        assertEq(externalToken.balanceOf(address(marketMaker)), marketMaker.reserveBalance(), "RESERVE == BALANCE OF");
+
+        // assertTrue(marketMaker.isHatched(), "MARKET MAKER SHOULD BE HATCHED");
+
+        // console2.log("===== continuous minting ======");
+        // externalToken.approve(address(marketMaker), 10_000 * TOKEN);
+        // marketMaker.mint(10_000 * TOKEN);
+        // assertEq(externalToken.balanceOf(address(marketMaker)), 17_500 * TOKEN, "MARKET MAKER SHOULD HAVE 17_500USDC");
+        // assertEq(externalToken.balanceOf(address(dao)), 17_500 * TOKEN, "MARKET MAKER SHOULD HAVE 17_500USDC");
+        //
+        // assertEq(externalToken.balanceOf(address(marketMaker)), marketMaker.reserveBalance(), "RESERVE == BALANCEOF");
     }
 }

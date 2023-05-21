@@ -78,7 +78,9 @@ contract ContinuousDaoSetup is PluginSetup {
         helpers[2] = hatchAdmin; // hatchBase.clone();
 
         GovernanceBurnableERC20(helpers[0]).initialize(IDAO(_dao), name, symbol);
-        MarketMaker(helpers[1]).initialize(IDAO(_dao), IBondedToken(helpers[0]), IERC20(externalToken), curve);
+        MarketMaker(helpers[1]).initialize(
+            IDAO(_dao), GovernanceBurnableERC20(helpers[0]), IERC20(externalToken), curve
+        );
         // SimpleHatch(helpers[2]).initialize(
         //     IDAO(_dao),
         //     new HatchParameters({

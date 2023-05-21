@@ -6,7 +6,8 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { PluginCloneable, IDAO } from "@aragon/core/plugin/PluginCloneable.sol";
 
 import { IBondingCurve } from "../interfaces/IBondingCurve.sol";
-import { IBondedToken } from "../interfaces/IBondedToken.sol";
+// import { IBondedToken } from "../interfaces/IBondedToken.sol";
+import { GovernanceBurnableERC20 } from "./GovernanceBurnableERC20.sol";
 
 import { Errors } from "../lib/Errors.sol";
 import { Events } from "../lib/Events.sol";
@@ -53,7 +54,7 @@ contract MarketMaker is PluginCloneable, Modifiers {
     // =============================================================== //
 
     /// @notice The bonded token
-    IBondedToken private _bondedToken;
+    GovernanceBurnableERC20 private _bondedToken;
 
     /// @notice The external token used to purchase the bonded token
     IERC20 private _externalToken;
@@ -86,7 +87,7 @@ contract MarketMaker is PluginCloneable, Modifiers {
      */
     function initialize(
         IDAO dao_,
-        IBondedToken bondedToken_,
+        GovernanceBurnableERC20 bondedToken_,
         IERC20 externalToken_,
         CurveParameters memory curve_
     )
@@ -110,17 +111,34 @@ contract MarketMaker is PluginCloneable, Modifiers {
     }
 
     function hatch(
-        address hatchTo,
-        uint256 hatchAmount
+        uint256 initialSupply,
+        uint256 fundingAmount,
+        address hatchTo
     )
         external
-        validateReserve(_externalToken)
         preHatch(_hatched)
         auth(HATCH_PERMISSION_ID)
     {
-        if (hatchTo != address(0)) _bondedToken.mint(address(hatchTo), hatchAmount);
         _hatched = true;
-        emit Events.Hatch(hatchTo, hatchTo == address(0) ? 0 : hatchAmount);
+        // pull the external tokens from the hatcher
+        _externalToken.transferFrom(msg.sender, address(this), fundingAmount);
+
+        // get the balance of the marketmaker and send theta to the DAO
+        uint256 amount = _externalToken.balanceOf(address(this));
+
+        // validate there is Liquidity to hatch with
+        if(amount == 0) revert Errors.InitialReserveCannotBeZero();
+
+        uint256 theta = (amount * _curve.theta) / DENOMINATOR_PPM; // Calculate the funding amount
+        uint256 liquidity = amount - theta;
+        _externalToken.transfer(address(dao()), theta);
+
+        // mint the hatched tokens to the hatcher
+        if (hatchTo != address(0)) _bondedToken.mint(address(hatchTo), initialSupply);
+        emit Events.Hatch(hatchTo, hatchTo == address(0) ? 0 : initialSupply);
+
+        // this event parameters are not consistent and confusing, change them
+        emit Events.ContinuousMint(hatchTo, initialSupply, fundingAmount, liquidity, theta);
     }
 
     // =============================================================== //
@@ -133,7 +151,7 @@ contract MarketMaker is PluginCloneable, Modifiers {
      * Emits a {ContinuousMint} event.
      * @param _amount The amount of external tokens used to mint.
      */
-    function mint(uint256 _amount) public payable isDepositZero(_amount) postHatch(_hatched) {
+    function mint(uint256 _amount) public isDepositZero(_amount) postHatch(_hatched) {
         _externalToken.transferFrom(msg.sender, address(this), _amount);
 
         // Calculate the funding portion and the reserve portion
@@ -146,7 +164,8 @@ contract MarketMaker is PluginCloneable, Modifiers {
         // transfer the funding amount to the funding pool
         _externalToken.transfer(address(dao()), fundingAmount);
         // Mint the tokens to the sender
-        _bondedToken.mint(msg.sender, rewardAmount);
+        // but this is being called with static call
+        _bondedToken.mint(address(msg.sender), rewardAmount);
 
         // Emit the ContinuousMint event
         emit Events.ContinuousMint(msg.sender, rewardAmount, _amount, reserveAmount, fundingAmount);
@@ -163,7 +182,8 @@ contract MarketMaker is PluginCloneable, Modifiers {
     function burn(uint256 _amount) public isDepositZero(_amount) postHatch(_hatched) {
         // The sender must have a sufficient balance to burn the specified amount of tokens
         // and approve the Market Maker
-        _bondedToken.burn(msg.sender, _amount);
+        _bondedToken.transferFrom(msg.sender, address(this), _amount);
+        _bondedToken.burn(_amount);
 
         // Calculate the refund amount
         uint256 refundAmount = calculateBurn(_amount);
@@ -224,7 +244,8 @@ contract MarketMaker is PluginCloneable, Modifiers {
      */
     function sponsoredBurn(uint256 _amount) external isDepositZero(_amount) postHatch(_hatched) {
         // Burn the specified amount of tokens from the caller's balance
-        _bondedToken.burn(msg.sender, _amount);
+        _bondedToken.transferFrom(msg.sender, address(this), _amount);
+        _bondedToken.burn(_amount);
 
         // Emit the SponsoredBurn event, which logs the details of the burn transaction
         emit Events.SponsoredBurn(msg.sender, _amount);
@@ -307,7 +328,7 @@ contract MarketMaker is PluginCloneable, Modifiers {
         return _externalToken;
     }
 
-    function bondedToken() public view returns (IBondedToken) {
+    function bondedToken() public view returns (GovernanceBurnableERC20) {
         return _bondedToken;
     }
 
