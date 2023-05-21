@@ -30,7 +30,7 @@ contract Integration is IntegrationBase {
         assertEq(address(marketMaker.bondedToken()), (address(governanceToken)), "BONDED TOKEN");
         assertEq(governanceToken.totalSupply(), 0, "HATCH TOKENS SHOULD BE 0");
         assertTrue(
-            dao.hasPermission(address(marketMaker), address(this), keccak256("HATCH_PERMISSION"), EMPTY_BYTES),
+            dao.hasPermission(address(marketMaker), address(hatcher), keccak256("HATCH_PERMISSION"), EMPTY_BYTES),
             "this contract can hatch"
         );
 
@@ -54,17 +54,19 @@ contract Integration is IntegrationBase {
         assertEq(governanceToken.balanceOf(hatcher), 100_000 * TOKEN, "HATCHER SHOULD HAVE 100K TOKENS");
         assertEq(externalToken.balanceOf(address(marketMaker)), 75_000 * TOKEN, "MARKET MAKER SHOULD HAVE 75_000 TKN");
         // ***TODO***: this is a great one for an invariant test
-        // assertEq(externalToken.balanceOf(address(marketMaker)), marketMaker.reserveBalance(), "RESERVE == BALANCEOF");
-
+        // assertEq(externalToken.balanceOf(address(marketMaker)), marketMaker.reserveBalance(), "RESERVE ==
+        // BALANCEOF");
 
         // assertTrue(marketMaker.isHatched(), "MARKET MAKER SHOULD BE HATCHED");
 
         // console2.log("===== continuous minting ======");
         // externalToken.approve(address(marketMaker), 10_000 * TOKEN);
         // marketMaker.mint(10_000 * TOKEN);
-        // assertEq(externalToken.balanceOf(address(marketMaker)), 17_500 * TOKEN, "MARKET MAKER SHOULD HAVE 17_500USDC");
+        // assertEq(externalToken.balanceOf(address(marketMaker)), 17_500 * TOKEN, "MARKET MAKER SHOULD HAVE
+        // 17_500USDC");
         // assertEq(externalToken.balanceOf(address(dao)), 17_500 * TOKEN, "MARKET MAKER SHOULD HAVE 17_500USDC");
         //
-        // assertEq(externalToken.balanceOf(address(marketMaker)), marketMaker.reserveBalance(), "RESERVE == BALANCEOF");
+        // assertEq(externalToken.balanceOf(address(marketMaker)), marketMaker.reserveBalance(), "RESERVE ==
+        // BALANCEOF");
     }
 }
