@@ -12,17 +12,17 @@ interface IBondingCurve {
     /**
      * @notice Calculates the amount of continuous tokens that can be minted for a given reserve token amount.
      * @dev Implements the bonding curve formula to calculate the mint reward.
-     * @param _reserveTokenAmount The amount of reserve tokens to be provided for minting.
-     * @param _continuousSupply The current supply of continuous tokens.
-     * @param _reserveBalance The current balance of reserve tokens in the contract.
-     * @param _reserveRatio The reserve ratio, represented in ppm (parts per million), ranging from 1 to 1,000,000.
+     * @param depositAmount The amount of reserve tokens to be provided for minting.
+     * @param continuousSupply The current supply of continuous tokens.
+     * @param reserveBalance The current balance of reserve tokens in the contract.
+     * @param reserveRatio The reserve ratio, represented in ppm (parts per million), ranging from 1 to 1,000,000.
      * @return The amount of continuous tokens that can be minted.
      */
     function getContinuousMintReward(
-        uint256 _reserveTokenAmount,
-        uint256 _continuousSupply,
-        uint256 _reserveBalance,
-        uint32 _reserveRatio
+        uint256 depositAmount,
+        uint256 continuousSupply,
+        uint256 reserveBalance,
+        uint32 reserveRatio
     )
         external
         view

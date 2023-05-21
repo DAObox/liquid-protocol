@@ -78,12 +78,18 @@ contract IntegrationBase is DAOParams, PRBTest, StdCheats {
             _releaseMetadata: "0x00",
             _buildMetadata: "0x00"
         });
+        vm.label(address(continuousRepo), "continuousRepo");
+        vm.label(address(continuousSetup), "continuousSetup");
+        vm.label(address(repoFactory), "repoFactory");
+        vm.label(address(daoFactory), "daoFactory");
     }
 
     function deployContracts() public {
         bondingCurve = IBondingCurve(new BancorBondingCurve());
         externalToken = new MockUSDC();
         curveParams = CurveParameters({ theta: 250_000, friction: 5000, reserveRatio: 300_000, formula: bondingCurve });
+        vm.label(address(bondingCurve), "bondingCurve");
+        vm.label(address(externalToken), "USDC");
     }
 
     function deployDAO() public {
@@ -111,6 +117,12 @@ contract IntegrationBase is DAOParams, PRBTest, StdCheats {
                 governanceToken = GovernanceBurnableERC20(_token);
                 voting = TokenVoting(_tokenVoting);
                 hatchAdmin = _hatchAdmin;
+
+                vm.label(address(dao), "dao");
+                vm.label(address(marketMaker), "marketMaker");
+                vm.label(address(governanceToken), "governanceToken");
+                vm.label(address(voting), "voting");
+                vm.label(address(hatchAdmin), "hatchAdmin");
             }
         }
     }

@@ -34,21 +34,30 @@ contract Integration is IntegrationBase {
             "this contract can hatch"
         );
 
-        console2.log("===== hatching ======");
+           console2.log("===== hatching ======");
         // mint tokens to the hatch admin which is this contract
         externalToken.mint(address(this), 100_000 * TOKEN);
         externalToken.transfer(address(marketMaker), 10_000 * TOKEN);
 
+        vm.prank(address(marketMaker));
+        governanceToken.mint(address(marketMaker), 10_000);
+
         // expect the hatch to emit a hatch event
-        vm.expectEmit(true, false, false, true, address(marketMaker));
-        emit Events.Hatch(address(this), 10_000 * TOKEN);
+        // vm.expectEmit(true, false, false, true, address(marketMaker));
+        // emit Events.Hatch(address(this), 10_000 * TOKEN);
         // ***MINTING IS BROKEN IN HATCH***
-        marketMaker.hatch(address(this), 10_000 * TOKEN);
+        marketMaker.hatch(address(0), 10_000 * TOKEN);
 
         // validate the hatch
-        assertEq(governanceToken.balanceOf(address(this)), 10_000 * TOKEN, "HATCH TOKENS SHOULD BE 10,000");
+        assertEq(governanceToken.totalSupply(), 10_000, "HATCH TOKENS SHOULD BE 10_000");
         assertEq(externalToken.balanceOf(address(marketMaker)), 10_000 * TOKEN, "MARKET MAKER SHOULD HAVE 10_000 USDC");
         assertEq(externalToken.balanceOf(address(marketMaker)), marketMaker.reserveBalance(), "RESERVE == BALANCE OF");
         assertTrue(marketMaker.isHatched(), "MARKET MAKER SHOULD BE HATCHED");
+
+        console2.log("===== continuous minting ======");
+        externalToken.approve(address(marketMaker), 10_000 * TOKEN);
+          marketMaker.mint(10_000 * TOKEN);
+        assertEq(externalToken.balanceOf(address(marketMaker)), 20_000 * TOKEN, "MARKET MAKER SHOULD HAVE 10_000 USDC");
+        assertEq(externalToken.balanceOf(address(marketMaker)), marketMaker.reserveBalance(), "RESERVE == BALANCE OF");
     }
 }

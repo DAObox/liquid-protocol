@@ -118,9 +118,9 @@ contract MarketMaker is PluginCloneable, Modifiers {
         preHatch(_hatched)
         auth(HATCH_PERMISSION_ID)
     {
-        if (address(hatchTo) != address(0)) _bondedToken.mint(address(hatchTo), hatchAmount);
+        if (hatchTo != address(0)) _bondedToken.mint(address(hatchTo), hatchAmount);
         _hatched = true;
-        emit Events.Hatch(hatchTo, hatchAmount);
+        emit Events.Hatch(hatchTo, hatchTo == address(0) ? 0 : hatchAmount);
     }
 
     // =============================================================== //
@@ -261,7 +261,12 @@ contract MarketMaker is PluginCloneable, Modifiers {
      * @return uint The amount of tokens that can be minted with {_amount}.
      */
     function calculateMint(uint256 _amount) public view returns (uint256) {
-        return _curve.formula.getContinuousMintReward(_amount, totalSupply(), reserveBalance(), _curve.reserveRatio);
+        return _curve.formula.getContinuousMintReward({
+            depositAmount: _amount,
+            continuousSupply: totalSupply(),
+            reserveBalance: reserveBalance(),
+            reserveRatio: reserveRatio()
+        });
     }
 
     /**
@@ -308,5 +313,9 @@ contract MarketMaker is PluginCloneable, Modifiers {
 
     function isHatched() public view returns (bool) {
         return _hatched;
+    }
+
+    function reserveRatio() public view returns (uint32) {
+        return _curve.reserveRatio;
     }
 }
