@@ -24,8 +24,6 @@ contract ContinuousDaoSetup is PluginSetup {
     /// @notice The address of the `TokenVoting` base contract.
     address private immutable tokenVotingBase;
 
-    address private immutable hatchBase;
-
     address private immutable governanceERC20Base;
 
     address private immutable marketMakerBase;
@@ -36,7 +34,6 @@ contract ContinuousDaoSetup is PluginSetup {
     constructor() {
         tokenVotingBase = address(new TokenVoting());
         governanceERC20Base = address(new GovernanceBurnableERC20());
-        hatchBase = address(new SimpleHatch());
         marketMakerBase = address(new MarketMaker());
     }
 
@@ -52,23 +49,9 @@ contract ContinuousDaoSetup is PluginSetup {
             string memory symbol,
             address externalToken,
             MajorityVotingBase.VotingSettings memory votingSettings,
-            // HatchDeploymentInfo memory hatchInfo,
-            // VestingSchedule memory schedule,
             CurveParameters memory curve,
             address hatchAdmin
-        ) = abi.decode(
-            _data,
-            (
-                string,
-                string,
-                address,
-                MajorityVotingBase.VotingSettings,
-                // HatchDeploymentInfo,
-                // VestingSchedule,
-                CurveParameters,
-                address
-            )
-        );
+        ) = abi.decode(_data, (string, string, address, MajorityVotingBase.VotingSettings, CurveParameters, address));
 
         address[] memory helpers = new address[](3);
 
@@ -81,21 +64,6 @@ contract ContinuousDaoSetup is PluginSetup {
         MarketMaker(helpers[1]).initialize(
             IDAO(_dao), GovernanceBurnableERC20(helpers[0]), IERC20(externalToken), curve
         );
-        // SimpleHatch(helpers[2]).initialize(
-        //     IDAO(_dao),
-        //     new HatchParameters({
-        //     externalToken: IERC20(externalToken),
-        //     bondedToken: helpers[0],
-        //     pool: helpers[1],
-        //     initialPrice: hatchInfo.initialPrice,
-        //     raised: 0,
-        //     minimumRaise: hatchInfo.minimumRaise,
-        //     maximumRaise: hatchInfo.maximumRaise,
-        //     hatchDeadline: hatchInfo.hatchDeadline,
-        //     status: HatchStatus.OPEN
-        //     }),
-        //     schedule
-        // );
 
         plugin = createERC1967Proxy(
             address(tokenVotingBase),
