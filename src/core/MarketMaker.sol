@@ -127,7 +127,7 @@ contract MarketMaker is PluginCloneable, Modifiers {
         uint256 amount = _externalToken.balanceOf(address(this));
 
         // validate there is Liquidity to hatch with
-        if(amount == 0) revert Errors.InitialReserveCannotBeZero();
+        if (amount == 0) revert Errors.InitialReserveCannotBeZero();
 
         uint256 theta = (amount * _curve.theta) / DENOMINATOR_PPM; // Calculate the funding amount
         uint256 liquidity = amount - theta;
@@ -158,11 +158,13 @@ contract MarketMaker is PluginCloneable, Modifiers {
         uint256 fundingAmount = (_amount * _curve.theta) / DENOMINATOR_PPM; // Calculate the funding amount
         uint256 reserveAmount = _amount - fundingAmount; // Calculate the reserve amount
 
+        // transfer the funding amount to the funding pool
+        // could the DAO reenter? 🧐
+        _externalToken.transfer(address(dao()), fundingAmount);
+
         // Calculate the reward amount and mint the tokens
         uint256 rewardAmount = calculateMint(_amount); // Calculate the reward amount
 
-        // transfer the funding amount to the funding pool
-        _externalToken.transfer(address(dao()), fundingAmount);
         // Mint the tokens to the sender
         // but this is being called with static call
         _bondedToken.mint(address(msg.sender), rewardAmount);

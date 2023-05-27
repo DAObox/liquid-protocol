@@ -34,39 +34,59 @@ contract Integration is IntegrationBase {
             "this contract can hatch"
         );
 
-        console2.log("===== hatching ======");
-        // Hatch the market maker by sending $100,000 to the market maker.tx
-        // the expected behaviour is for the $75k to go to the market maker where
-        // 25K will go to the DAO as 25% theta has been set. The hatcher will choose
-        // get all the initial tokens. Remember this should be another contract with
-        // its own logic as to how to distribute these DAO tokens. The Hatcher chould
-        // have no extra powers after the hatch.
+        // // Check USDC Balances
+        // assertEq(externalToken.balanceOf(address(marketMaker)), 97_500 * TOKEN, "MARKET MAKER SHOULD HAVE $82,000 ");
+        // assertEq(externalToken.balanceOf(address(dao)), 32_500 * TOKEN, "MARKET MAKER SHOULD HAVE $27,500");
+        // assertEq(externalToken.balanceOf(address(marketMaker)), marketMaker.reserveBalance(), "RESERVE ==BALANCEOF");
+    }
 
-        // Prank the hatcher and deploy the funding
-        vm.startPrank(hatcher);
-        console2.log("Hatcher $", externalToken.balanceOf(hatcher));
-        externalToken.approve(address(marketMaker), 100_000 * TOKEN);
-        marketMaker.hatch({ initialSupply: 100_000 * TOKEN, fundingAmount: 100_000 * TOKEN, hatchTo: hatcher });
+    function test_hatch(uint256 initialMint, uint256 initialDeposit) external {
+        initialMint = bound(initialMint, 100, uint256(~uint128(0)));
+        initialDeposit = bound(initialDeposit, 100, uint256(~uint128(0)));
+        uint256 expectedPoolUSDC = (initialDeposit * 75) / 100;
+
+        hatch(initialMint, initialDeposit);
+
+        assertTrue(marketMaker.isHatched(), "MARKET MAKER SHOULD BE HATCHED");
+        assertEq(governanceToken.totalSupply(), initialMint, "HATCH TOKENS SHOULD BE 100_000");
+        assertEq(governanceToken.balanceOf(hatcher), initialMint, "HATCHER SHOULD HAVE 100K TOKENS");
+        assertApproxEqRel(
+            externalToken.balanceOf(address(marketMaker)), expectedPoolUSDC, 1, "MARKET MAKER SHOULD HAVE 75_000 TKN"
+        );
+        assertEq(externalToken.balanceOf(address(marketMaker)), marketMaker.reserveBalance(), "RESERVE == BALANCEOF");
+    }
+
+    function test_mint(uint256 depositAmount) external {
+        depositAmount = bound(depositAmount, 1, uint256(~uint128(0)));
+        hatch();
+        externalToken.mint(alice, 42_000 ether);
+
+        assertEq(governanceToken.balanceOf(alice), 0, "ALICE SHOULD HAVE 0 TKN");
+
+        uint256 aliceExpected = expectedPurchaseReturn(42_000 ether);
+        console2.log("Alice Expected", aliceExpected);
+        vm.startPrank(alice);
+        externalToken.approve(address(marketMaker), ~uint256(0));
+        marketMaker.mint(42_000 ether);
         vm.stopPrank();
+        console2.log("Alice Actual  ", governanceToken.balanceOf(alice));
 
-        // validate the hatch
-        assertEq(governanceToken.totalSupply(), 100_000 * TOKEN, "HATCH TOKENS SHOULD BE 100_000");
-        assertEq(governanceToken.balanceOf(hatcher), 100_000 * TOKEN, "HATCHER SHOULD HAVE 100K TOKENS");
-        assertEq(externalToken.balanceOf(address(marketMaker)), 75_000 * TOKEN, "MARKET MAKER SHOULD HAVE 75_000 TKN");
-        // ***TODO***: this is a great one for an invariant test
-        // assertEq(externalToken.balanceOf(address(marketMaker)), marketMaker.reserveBalance(), "RESERVE ==
-        // BALANCEOF");
+        assertEq(governanceToken.balanceOf(alice), aliceExpected, "ALICE SHOULD HAVE THIS MANY TKN");
+    }
 
-        // assertTrue(marketMaker.isHatched(), "MARKET MAKER SHOULD BE HATCHED");
+    function test_burn(uint256 tokensToBurn) external {
+        hatch();
+        tokensToBurn = bound(tokensToBurn, 1, governanceToken.balanceOf(hatcher));
+        vm.prank(hatcher);
+        governanceToken.transfer(address(bob), tokensToBurn);
 
-        // console2.log("===== continuous minting ======");
-        // externalToken.approve(address(marketMaker), 10_000 * TOKEN);
-        // marketMaker.mint(10_000 * TOKEN);
-        // assertEq(externalToken.balanceOf(address(marketMaker)), 17_500 * TOKEN, "MARKET MAKER SHOULD HAVE
-        // 17_500USDC");
-        // assertEq(externalToken.balanceOf(address(dao)), 17_500 * TOKEN, "MARKET MAKER SHOULD HAVE 17_500USDC");
-        //
-        // assertEq(externalToken.balanceOf(address(marketMaker)), marketMaker.reserveBalance(), "RESERVE ==
-        // BALANCEOF");
+        uint256 bobExpected = expectedSaleReturn(tokensToBurn);
+        console2.log("Bob Expected", bobExpected);
+        vm.startPrank(bob);
+        governanceToken.approve(address(marketMaker), ~uint256(0));
+        marketMaker.burn(tokensToBurn);
+        vm.stopPrank();
+        console2.log("Bob Actual  ", externalToken.balanceOf(bob));
+        assertApproxEqRelDecimal(externalToken.balanceOf(bob), bobExpected, 1, 16, "BOB SHOULD HAVE THIS MANY USDC");
     }
 }

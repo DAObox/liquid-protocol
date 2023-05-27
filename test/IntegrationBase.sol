@@ -24,6 +24,7 @@ import { BancorBondingCurve } from "../src/math/BancorBondingCurve.sol";
 import { MockUSDC } from "../src/mocks/MockUSDC.sol";
 
 contract DAOParams {
+    uint32 public constant DENOMINATOR_PPM = 1_000_000;
     uint32 internal RATIO = 10 ** 4;
     uint64 internal ONE_DAY = 86_400;
     bytes internal EMPTY_BYTES = "";
@@ -69,7 +70,7 @@ contract IntegrationBase is DAOParams, Helpers {
     address internal hatchAdmin;
 
     function setUp() public virtual {
-        createFork("mainnet", 17_307_419);
+        createFork("mainnet", 17_328_640);
         createAgents();
         setupRepo();
         deployContracts();
@@ -89,8 +90,8 @@ contract IntegrationBase is DAOParams, Helpers {
     }
 
     function createAgents() public {
-        deployer = createNamedUser("deployer");
-        hatcher = createNamedUser("hatcher");
+        deployer = createNamedUser("DEPLOYER");
+        hatcher = createNamedUser("HATCHER");
         alice = createNamedUser("ALICE");
         bob = createNamedUser("BOB");
     }
@@ -122,9 +123,9 @@ contract IntegrationBase is DAOParams, Helpers {
         vm.label(address(bondingCurve), "bondingCurve");
         vm.label(address(externalToken), "USDC");
 
-        externalToken.mint(hatcher, 1_000_000 * TOKEN);
-        externalToken.mint(alice, 100_000 * TOKEN);
-        externalToken.mint(bob, 100_000 * TOKEN);
+        // externalToken.mint(hatcher, 1_000_000 * TOKEN);
+        // externalToken.mint(alice, 100_000 * TOKEN);
+        // externalToken.mint(bob, 100_000 * TOKEN);
     }
 
     function deployDAO() public {
@@ -161,5 +162,42 @@ contract IntegrationBase is DAOParams, Helpers {
                 vm.label(address(hatchAdmin), "hatchAdmin");
             }
         }
+    }
+
+    function hatch() public {
+        hatch(100_000 ether, 100_000 ether);
+    }
+
+    function hatch(uint256 initialMint, uint256 initialDeposit) public {
+        externalToken.mint(hatcher, initialDeposit);
+
+        vm.startPrank(hatcher);
+        externalToken.approve(address(marketMaker), initialDeposit);
+        marketMaker.hatch({ initialSupply: initialMint, fundingAmount: initialDeposit, hatchTo: hatcher });
+        vm.stopPrank();
+    }
+
+    // ----------------- BONDING CURVE WRAPPERS ------------------- //
+    function expectedPurchaseReturn(uint256 _depositAmount) public view returns (uint256) {
+        // the expected return is dependent on the reserve balance which will increase
+        // with the deposit amount. We need to calculate the reserve balance after the deposit
+        uint256 fundingAmount = (_depositAmount * curveParams.theta) / DENOMINATOR_PPM;
+        uint256 reserveAmount = _depositAmount - fundingAmount; // Calculate the reserve amount
+
+        return bondingCurve.getContinuousMintReward({
+            depositAmount: _depositAmount,
+            continuousSupply: governanceToken.totalSupply(),
+            reserveBalance: externalToken.balanceOf(address(marketMaker)) + reserveAmount,
+            reserveRatio: curveParams.reserveRatio
+        });
+    }
+
+    function expectedSaleReturn(uint256 _sellAmount) public view returns (uint256) {
+        return bondingCurve.getContinuousBurnRefund({
+            sellAmount: _sellAmount,
+            continuousSupply: governanceToken.totalSupply(),
+            reserveBalance: externalToken.balanceOf(address(marketMaker)),
+            reserveRatio: curveParams.reserveRatio
+        });
     }
 }

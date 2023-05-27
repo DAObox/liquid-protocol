@@ -4,8 +4,9 @@ pragma solidity >= 0.8.17;
 import { PRBTest } from "@prb/test/PRBTest.sol";
 import { console2 } from "forge-std/console2.sol";
 import { StdCheats } from "forge-std/StdCheats.sol";
+import { Test } from "forge-std/Test.sol";
 
-contract Helpers is PRBTest, StdCheats {
+contract Helpers is Test {
     bytes32 internal nextUser = keccak256(abi.encodePacked("user address"));
 
     function getNextUserAddress() external returns (address payable) {

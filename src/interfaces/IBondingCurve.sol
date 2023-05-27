@@ -31,17 +31,17 @@ interface IBondingCurve {
     /**
      * @notice Calculates the amount of reserve tokens that can be refunded for a given amount of continuous tokens.
      * @dev Implements the bonding curve formula to calculate the burn refund.
-     * @param _continuousTokenAmount The amount of continuous tokens to be burned.
-     * @param _continuousSupply The current supply of continuous tokens.
-     * @param _reserveBalance The current balance of reserve tokens in the contract.
-     * @param _reserveRatio The reserve ratio, represented in ppm (parts per million), ranging from 1 to 1,000,000.
+     * @param sellAmount The amount of continuous tokens to be burned.
+     * @param continuousSupply The current supply of continuous tokens.
+     * @param reserveBalance The current balance of reserve tokens in the contract.
+     * @param reserveRatio The reserve ratio, represented in ppm (parts per million), ranging from 1 to 1,000,000.
      * @return The amount of reserve tokens that can be refunded.
      */
     function getContinuousBurnRefund(
-        uint256 _continuousTokenAmount,
-        uint256 _continuousSupply,
-        uint256 _reserveBalance,
-        uint32 _reserveRatio
+        uint256 sellAmount,
+        uint256 continuousSupply,
+        uint256 reserveBalance,
+        uint32 reserveRatio
     )
         external
         view

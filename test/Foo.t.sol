@@ -3,6 +3,8 @@ pragma solidity >=0.8.17 <0.9.0;
 
 import { PRBTest } from "@prb/test/PRBTest.sol";
 import { console2 } from "forge-std/console2.sol";
+
+import { Test } from "forge-std/Test.sol";
 import { StdCheats } from "forge-std/StdCheats.sol";
 
 interface IERC20 {
@@ -11,7 +13,7 @@ interface IERC20 {
 
 /// @dev If this is your first time with Forge, see the "Writing Tests" tutorial in the Foundry Book.
 /// https://book.getfoundry.sh/forge/writing-tests
-contract FooTest is PRBTest, StdCheats {
+contract FooTest is Test {
     /// @dev An optional function invoked before each test case is run.
     function setUp() public virtual {
         // solhint-disable-previous-line no-empty-blocks
