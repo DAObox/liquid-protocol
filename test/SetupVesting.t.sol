@@ -9,9 +9,9 @@ import { console } from "forge-std/console.sol";
 import { stdStorage, StdStorage, Test } from "forge-std/Test.sol";
 
 import { Utils } from "./utils/Utils.sol";
-import { Vesting } from "../core/Vesting.sol";
-import { MockBondedToken } from "../mocks/MockBondedToken.sol";
-import { VestingSchedule } from "../lib/Types.sol";
+import { Vesting } from "../src/core/Vesting.sol";
+import { MockBondedToken } from "../src/mocks/MockBondedToken.sol";
+import { VestingSchedule } from "../src/lib/Types.sol";
 
 contract SetupVesting is Test {
     using Address for address;

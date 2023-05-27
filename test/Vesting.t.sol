@@ -7,8 +7,8 @@ import { stdStorage, StdStorage, Test } from "forge-std/Test.sol";
 import { Utils } from "./utils/Utils.sol";
 
 import { SetupVesting } from "./SetupVesting.t.sol";
-import { VestingSchedule } from "../lib/Types.sol";
-import { Errors } from "../lib/Errors.sol";
+import { VestingSchedule } from "../src/lib/Types.sol";
+import { Errors } from "../src/lib/Errors.sol";
 
 contract VestingTest is SetupVesting {
     uint256 internal maxTransferAmount = 12e18;
