@@ -37,8 +37,7 @@ forge build
 ```
 3. run the integration test 
 ```
-forge test --fork-url mainnet -vvv --match-test test_protocol
-```
+forge test -vvv 
 
 <br/>
 
