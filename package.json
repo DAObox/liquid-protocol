@@ -3,8 +3,8 @@
   "description": "Foundry-based template for developing Solidity smart contracts",
   "version": "1.0.0",
   "author": {
-    "name": "Paul Razvan Berg",
-    "url": "https://github.com/PaulRBerg"
+    "name": "DAOBox",
+    "url": "https://github.com/DAOBox"
   },
   "devDependencies": {
     "prettier": "^2.8.7",
