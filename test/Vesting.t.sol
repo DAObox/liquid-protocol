@@ -188,7 +188,7 @@ contract VestingTest is SetupVesting {
 
     //     // Act & Assert::
     //     vm.prank(beneficiary);
-    //     vm.expectEmit(true, true, true, false);
+    //     vm.expectEmit(false, false, false, false);
     //     emit IVotes.DelegateVotesChanged(beneficiary, beneficiary, user);
     //     // address indexed delegator, address indexed fromDelegate, address indexed toDelegate
     //     vesting.delegateVestedTokens(user);
@@ -208,13 +208,18 @@ contract VestingTest is SetupVesting {
     // // =============================================================== //
 
     // /// Test for getWithdrawableAmount() function
-    // function testGetWithdrawableAmount() public {
-    //     // Arange:
+    function testGetWithdrawableAmount() public {
+        // Arange:
+        setupVesting();
 
-    //     // Act:
+        // Act:
+        uint256 releasableAmount = vesting.computeReleasableAmount();
+        uint256 vestingBalance = token.balanceOf(address(vesting));
+        uint256 withdrawableAmount = vesting.getWithdrawableAmount();
 
-    //     // Assert:
-    // }
+        // Assert:
+        assertEq(withdrawableAmount, vestingBalance - releasableAmount, "Withdrawable amount should match!");
+    }
 
     // // =============================================================== //
     // // =============== COMPUTE RELEASABLE AMOUNT ===================== //
@@ -228,57 +233,33 @@ contract VestingTest is SetupVesting {
         VestingSchedule memory initialSchedule = vesting.getSchedule();
         // Act:
 
-        console.log("Scheduled Cliff Position", initialSchedule.cliff);
-        console.log("Current Time", block.timestamp);
-        console.log("1 hour later Time", block.timestamp + 1 hours);
-        // vm.warp(30 days);
-        // uint256 amountAfterCliff = vesting.computeReleasableAmount();
+        skip(30 days);
+        uint256 amountAfterCliff = vesting.computeReleasableAmount();
 
-        // vm.warp(365 days);
-        // uint256 amountAfterDeadline = vesting.computeReleasableAmount();
+        skip(335 days);
+        uint256 amountAfterDeadline = vesting.computeReleasableAmount();
         // Assert:
         assertEq(initialReleasableAmount, 0, "Should not be able to release any amount after initialize");
-        // assertTrue(amountAfterCliff > 0, "Some amount of vesting tokens must be released after cliff period");
-        // assertEq(
-        //     amountAfterDeadline,
-        //     initialSchedule.amountTotal - initialSchedule.released,
-        //     "Can release all remaining tokens"
-        // );
+        assertTrue(amountAfterCliff > 0, "Some amount of vesting tokens must be released after cliff period");
+        assertEq(
+            amountAfterDeadline,
+            initialSchedule.amountTotal - initialSchedule.released,
+            "Can release all remaining tokens"
+        );
     }
 
     // /// Test for computeReleasableAmount() function before the cliff
-    // function testComputeReleasableAmountBeforeCliff() public {
-    //      // Arange:
-    //         setupVesting();
-    //         VestingSchedule memory schedule = vesting.getSchedule();
-    //     // Assert:
-    //     console.log("Scheduled Cliff Position", schedule.cliff);
-    //     console.log("Current Time", block.timestamp);
-    //     console.log("1 hour later Time", block.timestamp + 1 hours);
-    //     skip((schedule.cliff * 1000) - 1 hours);
-    //     uint256 releasableAmount = vesting.computeReleasableAmount();
+    function testComputeReleasableAmountBeforeCliff() public {
+         // Arange:
+            setupVesting();
+            VestingSchedule memory schedule = vesting.getSchedule();
+        // Assert:
+        skip(schedule.cliff - 1 days);
+        uint256 releasableAmount = vesting.computeReleasableAmount();
 
-    //     // warp
-    //     assertEq(releasableAmount, 0, "Should not be able to release any amount before cliff");
-    // }
-
-    // /// Test for computeReleasableAmount() function after the vesting period
-    // function testComputeReleasableAmountAfterVestingPeriod() public {
-    //     // Arange:
-
-    //     // Act:
-
-    //     // Assert:
-    // }
-
-    // /// Test for computeReleasableAmount() function during the vesting period
-    // function testComputeReleasableAmountDuringVestingPeriod() public {
-    //     // Arange:
-
-    //     // Act:
-
-    //     // Assert:
-    // }
+        // warp
+        assertEq(releasableAmount, 0, "Should not be able to release any amount before cliff");
+    }
 
     // // =============================================================== //
     // // ====================== CURRENT TIME =========================== //
