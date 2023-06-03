@@ -145,6 +145,16 @@ contract Vesting is ReentrancyGuardUpgradeable, Modifiers {
     }
 
     /**
+     * @dev Returns the amount of tokens that can be withdrawn by the owner if they revoke vesting
+     *
+     * @return The withdrawable amount
+     */
+
+    function getBeneficiary() public view returns (address) {
+        return _beneficiary;
+    }
+
+    /**
      * @dev Computes the amount of tokens that can be released to the beneficiary.
      *      The releasable amount is dependent on the vesting schedule and the current time.
      *
@@ -177,11 +187,11 @@ contract Vesting is ReentrancyGuardUpgradeable, Modifiers {
     }
 
     /**
-     * @dev Returns the current time.
+     * @dev Returns the current time (in seconds).
      *
      * @return The current time
      */
-    function getCurrentTime() internal view virtual returns (uint256) {
+    function getCurrentTime() public view virtual returns (uint256) {
         return block.timestamp;
     }
 }

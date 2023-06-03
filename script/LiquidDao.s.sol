@@ -31,10 +31,7 @@ contract Deploy is BaseScript {
     function run() public broadcaster returns (address dao) {
         pluginSettings.push(
             DAOFactory.PluginSettings({
-                pluginSetupRef: PluginSetupRef({
-                    versionTag: PluginRepo.Tag({ release: 1, build: 1 }),
-                    pluginSetupRepo: repo
-                }),
+                pluginSetupRef: PluginSetupRef({versionTag: PluginRepo.Tag({release: 1, build: 1}), pluginSetupRepo: repo}),
                 data: abi.encode(
                     "Continuous DAO",
                     "CDAO",

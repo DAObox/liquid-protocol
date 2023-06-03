@@ -85,7 +85,7 @@ contract IntegrationBase is DAOParams, Helpers {
             return;
         }
         // Otherwise, run the test against the mainnet fork.
-        vm.createSelectFork({ urlOrAlias: network, blockNumber: blockNumber });
+        vm.createSelectFork({urlOrAlias: network, blockNumber: blockNumber});
         console2.log("Curent Block: ", blockNumber);
     }
 
@@ -119,7 +119,7 @@ contract IntegrationBase is DAOParams, Helpers {
         vm.prank(deployer);
         bondingCurve = IBondingCurve(new BancorBondingCurve());
         externalToken = new MockUSDC();
-        curveParams = CurveParameters({ theta: 250_000, friction: 5000, reserveRatio: 300_000, formula: bondingCurve });
+        curveParams = CurveParameters({theta: 250_000, friction: 5000, reserveRatio: 300_000, formula: bondingCurve});
         vm.label(address(bondingCurve), "bondingCurve");
         vm.label(address(externalToken), "USDC");
 
@@ -132,7 +132,7 @@ contract IntegrationBase is DAOParams, Helpers {
         pluginSettings.push(
             DAOFactory.PluginSettings({
                 pluginSetupRef: PluginSetupRef({
-                    versionTag: PluginRepo.Tag({ release: 1, build: 1 }),
+                    versionTag: PluginRepo.Tag({release: 1, build: 1}),
                     pluginSetupRepo: continuousRepo
                 }),
                 data: abi.encode("Continuous DAO", "CDAO", externalToken, votingSettings, curveParams, address(hatcher))
@@ -173,7 +173,7 @@ contract IntegrationBase is DAOParams, Helpers {
 
         vm.startPrank(hatcher);
         externalToken.approve(address(marketMaker), initialDeposit);
-        marketMaker.hatch({ initialSupply: initialMint, fundingAmount: initialDeposit, hatchTo: hatcher });
+        marketMaker.hatch({initialSupply: initialMint, fundingAmount: initialDeposit, hatchTo: hatcher});
         vm.stopPrank();
     }
 

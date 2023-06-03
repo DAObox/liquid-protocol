@@ -2,15 +2,20 @@
 pragma solidity >=0.8.17;
 
 import { console } from "forge-std/console.sol";
+import { IVotes } from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 import { stdStorage, StdStorage, Test } from "forge-std/Test.sol";
+import { SafeMath } from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 import { Utils } from "./utils/Utils.sol";
 
 import { SetupVesting } from "./SetupVesting.t.sol";
 import { VestingSchedule } from "../src/lib/Types.sol";
 import { Errors } from "../src/lib/Errors.sol";
+import { Events } from "../src/lib/Events.sol";
 
 contract VestingTest is SetupVesting {
+    // using SafeMath for uint256;
+
     uint256 internal maxTransferAmount = 12e18;
 
     function setUp() public virtual override {
@@ -83,45 +88,92 @@ contract VestingTest is SetupVesting {
     // =========================== RELEASE =========================== //
     // =============================================================== //
 
+    function testReleaseWithoutDelay() public {
+        // Arrange
+        setupVesting();
+        uint256 amount = 100 gwei;
+        uint256 releasableTokens = vesting.computeReleasableAmount();
+
+        //Act
+        vm.expectRevert(abi.encodeWithSelector(Errors.NotEnoughVestedTokens.selector, amount, releasableTokens));
+        vesting.release(amount);
+    }
     // /// Test for release() function
-    // function testRelease() public {
-    //     // Arange:
 
-    //     // Act:
+    function testRelease() public {
+        // Arange:
+        setupVesting();
+        VestingSchedule memory schedule = vesting.getSchedule();
+        uint256 initialBeneficiaryBalance = token.balanceOf(beneficiary);
 
-    //     // Assert:
-    // }
+        // Act:
+        skip(1 days);
+        uint256 releasableAmount = vesting.computeReleasableAmount();
+        uint256 amount = releasableAmount / 1000;
+        vesting.release(amount);
+        VestingSchedule memory finalSchedule = vesting.getSchedule();
 
-    // /// Test for release() function with invalid amount
-    // function testReleaseWithInvalidAmount() public {
-    //     // Arange:
+        // // Assert:
+        console.log("Final Schedule", finalSchedule.released);
+        assertEq(
+            finalSchedule.released,
+            schedule.released + amount,
+            "Amount should be added to VestingSchedule released field"
+        );
+        assertEq(
+            token.balanceOf(beneficiary),
+            initialBeneficiaryBalance + amount,
+            "Beneficary's balance should be increased by amount"
+        );
+    }
 
-    //     // Act:
+    /// Test for release() function with invalid amount
+    function testReleaseWithInvalidAmount() public {
+        // Arange:
+        setupVesting();
+        skip(1 days);
 
-    //     // Assert:
-    // }
+        // Act:
+        /// Get the releasable amount
+        uint256 releasableAmount = vesting.computeReleasableAmount();
+        // pass an amount obviously greater
+        uint256 amount = releasableAmount + 10;
+
+        // Assert:
+        vm.expectRevert(abi.encodeWithSelector(Errors.NotEnoughVestedTokens.selector, amount, releasableAmount));
+        vesting.release(amount);
+    }
 
     // // =============================================================== //
     // // ===================== TRANSFER VESTING ======================== //
     // // =============================================================== //
 
     // /// Test for transferVesting() function
-    // function testTransferVesting() public {
-    //     // Arange:
+    function testTransferVesting() public {
+        // Arange:
+        setupVesting();
+        Utils utils = new Utils();
+        address payable newBeneficiary = utils.getNextUserAddress();
 
-    //     // Act:
+        // Act:
+        vm.prank(beneficiary);
+        vesting.transferVesting(newBeneficiary);
 
-    //     // Assert:
-    // }
+        // Assert:
+        assertEq(vesting.getBeneficiary(), newBeneficiary, "Beneficiary should be updated.");
+    }
 
     // /// Test for transferVesting() function by non-beneficiary
-    // function testTransferVestingByNonBeneficiary() public {
-    //     // Arange:
+    function testTransferVestingByNonBeneficiary() public {
+        //  Arange:
+        setupVesting();
+        Utils utils = new Utils();
+        address payable newBeneficiary = utils.getNextUserAddress();
 
-    //     // Act:
-
-    //     // Assert:
-    // }
+        // Act:
+        vm.expectRevert(abi.encodeWithSelector(Errors.OnlyBeneficiary.selector, address(this), beneficiary));
+        vesting.transferVesting(newBeneficiary);
+    }
 
     // // =============================================================== //
     // // =============== DELEGATE VESTED TOKENS ======================== //
@@ -130,10 +182,16 @@ contract VestingTest is SetupVesting {
     // /// Test for delegateVestedTokens() function
     // function testDelegateVestedTokens() public {
     //     // Arange:
+    //     setupVesting();
+    //     Utils utils = new Utils();
+    //     address user = utils.getNextUserAddress();
 
-    //     // Act:
-
-    //     // Assert:
+    //     // Act & Assert::
+    //     vm.prank(beneficiary);
+    //     vm.expectEmit(true, true, true, false);
+    //     emit IVotes.DelegateVotesChanged(beneficiary, beneficiary, user);
+    //     // address indexed delegator, address indexed fromDelegate, address indexed toDelegate
+    //     vesting.delegateVestedTokens(user);
     // }
 
     // /// Test for delegateVestedTokens() function by non-beneficiary
@@ -146,26 +204,8 @@ contract VestingTest is SetupVesting {
     // }
 
     // // =============================================================== //
-    // // ======================== GET METHODS ========================== //
+    // // ======================== GET METHOD(S) ========================== //
     // // =============================================================== //
-
-    // /// Test for getToken() function
-    // function testGetToken() public {
-    //     // Arange:
-
-    //     // Act:
-
-    //     // Assert:
-    // }
-
-    // /// Test for getSchedule() function
-    // function testGetSchedule() public {
-    //     // Arange:
-
-    //     // Act:
-
-    //     // Assert:
-    // }
 
     // /// Test for getWithdrawableAmount() function
     // function testGetWithdrawableAmount() public {
@@ -181,21 +221,45 @@ contract VestingTest is SetupVesting {
     // // =============================================================== //
 
     // /// Test for computeReleasableAmount() function
-    // function testComputeReleasableAmount() public {
-    //     // Arange:
+    function testComputeReleasableAmount() public {
+        // Arange:
+        setupVesting();
+        uint256 initialReleasableAmount = vesting.computeReleasableAmount();
+        VestingSchedule memory initialSchedule = vesting.getSchedule();
+        // Act:
 
-    //     // Act:
+        console.log("Scheduled Cliff Position", initialSchedule.cliff);
+        console.log("Current Time", block.timestamp);
+        console.log("1 hour later Time", block.timestamp + 1 hours);
+        // vm.warp(30 days);
+        // uint256 amountAfterCliff = vesting.computeReleasableAmount();
 
-    //     // Assert:
-    // }
+        // vm.warp(365 days);
+        // uint256 amountAfterDeadline = vesting.computeReleasableAmount();
+        // Assert:
+        assertEq(initialReleasableAmount, 0, "Should not be able to release any amount after initialize");
+        // assertTrue(amountAfterCliff > 0, "Some amount of vesting tokens must be released after cliff period");
+        // assertEq(
+        //     amountAfterDeadline,
+        //     initialSchedule.amountTotal - initialSchedule.released,
+        //     "Can release all remaining tokens"
+        // );
+    }
 
     // /// Test for computeReleasableAmount() function before the cliff
     // function testComputeReleasableAmountBeforeCliff() public {
-    //     // Arange:
-
-    //     // Act:
-
+    //      // Arange:
+    //         setupVesting();
+    //         VestingSchedule memory schedule = vesting.getSchedule();
     //     // Assert:
+    //     console.log("Scheduled Cliff Position", schedule.cliff);
+    //     console.log("Current Time", block.timestamp);
+    //     console.log("1 hour later Time", block.timestamp + 1 hours);
+    //     skip((schedule.cliff * 1000) - 1 hours);
+    //     uint256 releasableAmount = vesting.computeReleasableAmount();
+
+    //     // warp
+    //     assertEq(releasableAmount, 0, "Should not be able to release any amount before cliff");
     // }
 
     // /// Test for computeReleasableAmount() function after the vesting period
@@ -221,11 +285,22 @@ contract VestingTest is SetupVesting {
     // // =============================================================== //
 
     // /// Test for getCurrentTime() function
-    // function testGetCurrentTime() public {
-    //     // Arange:
+    function testGetCurrentTime() public {
+        // Arange:
+        setupVesting();
+        VestingSchedule memory schedule = vesting.getSchedule();
+        // Act:
+        uint256 currentTime = vesting.getCurrentTime();
 
-    //     // Act:
+        skip(30 days);
+        uint256 twoDaysLater = vesting.getCurrentTime();
 
-    //     // Assert:
-    // }
+        skip(335 days);
+        uint256 aYearLater = vesting.getCurrentTime();
+
+        // Assert:
+        assertEq(currentTime, schedule.start, "Current time should equal the schedule start time");
+        assertEq(twoDaysLater, schedule.start + 2_592_000, "Current time should be 30 days later");
+        assertEq(aYearLater, schedule.start + 31_536_000, "Current time should be 365 days later");
+    }
 }
