@@ -5,7 +5,7 @@ import { ZERO_ADDRESS, contracts } from "~/lib/constants";
 const { MockUSDC } = contracts;
 
 export const useBalanceUSDC = ({ address }: { address: Address | undefined }) => {
-  const { data: usdcBalance } = useContractRead({
+  const { data: usdcBalance, status: usdBalanceStatus } = useContractRead({
     abi: mockUsdcABI,
     address: MockUSDC,
     functionName: "balanceOf",
@@ -13,5 +13,5 @@ export const useBalanceUSDC = ({ address }: { address: Address | undefined }) =>
     enabled: !!(address && address !== ZERO_ADDRESS),
   });
 
-  return { usdcBalance };
+  return { usdcBalance, usdBalanceStatus };
 };

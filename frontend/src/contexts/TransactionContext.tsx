@@ -1,56 +1,38 @@
 // transactionContext.tsx
-import {
-  createContext,
-  ReactNode,
-  useContext,
-  useReducer,
-  useState,
-} from "react";
-
-import {
-  useDaoBoxTokenGetContinuousMintReward as useMintReward,
-  useDaoBoxTokenGetContinuousBurnRefund as useBurnReward,
-  useDaoBoxTokenMint as useMintBox,
-  useDaoBoxTokenBurn as useBurnBox,
-  usePrepareDaoBoxTokenMint as usePrepareMint,
-  usePrepareDaoBoxTokenBurn as usePrepareBurn,
-  useDaoBoxTokenBalanceOf as useBOXBalance,
-} from "../hooks/wagmi/generated";
-
-import maticLogo from "../public/matic.svg";
-import daoboxLogo from "../public/logo_color.png";
-import { useAddRecentTransaction } from "@rainbow-me/rainbowkit";
+import { createContext, type ReactNode, useContext, useReducer, useState } from "react";
 
 import React from "react";
-import { TokenTransactionContextValue, TokenType } from "../Types";
-import { useAccount, useBalance } from "wagmi";
+import { useAccount } from "wagmi";
+import { type TokenType } from "~/types";
+import {
+  useBalanceBOX,
+  useBalanceUSDC,
+  useBurnBox,
+  useBurnReward,
+  useMintBox,
+  useMintReward,
+} from "~/hooks";
+import { formatUnits } from "ethers/lib/utils.js";
+import { BN, boxToken, usdcToken } from "~/lib";
+import { type BigNumber } from "ethers";
 
-export const boxToken: TokenType = {
-  logo: daoboxLogo,
-  alt: "daobox logo",
-  name: "BOX",
+type TokenTransactionContextType = {
+  tokens: {
+    sellToken: TokenType;
+    buyToken: TokenType;
+  };
+  switchTokens: () => void;
+  sellAmount: BigNumber;
+  setSellAmount: (amount: BigNumber) => void;
+  tokensReceivable: BigNumber | undefined;
+  handleExchange: () => void;
+  isLoading: boolean;
+  disableSwap: () => boolean;
+  buyTokenBalance: string;
+  saleTokenBalance: string;
 };
 
-export const maticToken: TokenType = {
-  logo: maticLogo,
-  alt: "matic logo",
-  name: "MATIC",
-};
-
-const TokenTransactionContext =
-  createContext<TokenTransactionContextValue | null>(null);
-
-export const useTokenTransaction = () => {
-  const context = useContext(TokenTransactionContext);
-
-  if (!context) {
-    throw new Error(
-      "useTokenTransaction must be used within a TokenTransactionProvider"
-    );
-  }
-
-  return context;
-};
+const TokenTransactionContext = createContext<TokenTransactionContextType | null>(null);
 
 const tokenReducer = (state: { buyToken: TokenType; sellToken: TokenType }) => {
   return {
@@ -65,75 +47,70 @@ interface TransactionsProps {
 }
 
 export const TokenTransactionProvider = ({ children }: TransactionsProps) => {
+  /// Tokens
   const [tokens, switchTokens] = useReducer(tokenReducer, {
-    sellToken: maticToken,
+    sellToken: usdcToken,
     buyToken: boxToken,
   });
+
+  /// Token Amounts
+  const [sellAmount, setSellAmount] = useState(BN(0));
+  const { mintReward: boxReceived } = useMintReward({ sellAmount });
+  const { burnReward: usdcReceived } = useBurnReward({ sellAmount });
+  const tokensReceivable = tokens.buyToken === boxToken ? boxReceived : usdcReceived;
+
+  /// User
   const { address } = useAccount();
-  const {
-    data: ethBalance,
-    isLoading: isEthBalanceLoading,
-    isError: isEthBalanceError,
-  } = useBalance({
-    address,
-    watch: true,
-  });
+  const { usdcBalance, usdBalanceStatus } = useBalanceUSDC({ address });
+  const { boxBalance, boxBalanceStatus } = useBalanceBOX({ address });
 
-  const {
-    data: boxBalance,
-    isLoading: isBoxBalanceLoading,
-    isError: isBoxBalanceError,
-  } = useBOXBalance({
-    args: [address!],
-    watch: true,
-    enabled: !!address,
-  });
-
-  const [sellAmount, setSellAmount] = useState(0n);
-  const { data: boxRecieved } = useMintReward({ args: [sellAmount] });
-  const { data: ethRecieved } = useBurnReward({ args: [sellAmount] });
-
-  const tokensReceivable =
-    tokens.buyToken === boxToken ? boxRecieved : ethRecieved;
-
-  const { buyBox, isMintLoading } = useMint({ sellAmount, tokensReceivable });
-  const { sellBox, isBurnLoading } = useBurn({ sellAmount, tokensReceivable });
+  /// Mutations
+  const { mintBox, isMintLoading } = useMintBox(sellAmount);
+  const { burnBox, isBurnLoading } = useBurnBox(sellAmount);
+  const isLoading = isMintLoading || isBurnLoading;
 
   const handleExchange = () => {
     console.log("handleExchange");
-    tokens.buyToken === boxToken ? buyBox?.() : sellBox?.();
+    tokens.buyToken === boxToken ? mintBox?.() : burnBox?.();
   };
 
   const disableSwap = () => {
     return (
-      sellAmount === 0n ||
-      (tokens.buyToken === boxToken && !buyBox) ||
-      (tokens.buyToken === maticToken && !sellBox) ||
+      sellAmount === BN(0) ||
+      (tokens.buyToken === boxToken && !mintBox) ||
+      (tokens.buyToken === usdcToken && !burnBox) ||
       isMintLoading ||
       isBurnLoading
     );
   };
 
-  const isLoading = isMintLoading || isBurnLoading;
-
   const getUserBalances = () => {
-    const BOX = isBoxBalanceLoading
-      ? "Loading..."
-      : isBoxBalanceError
-      ? "ERROR!"
-      : parseFloat(formatUnits(boxBalance ?? 0n, 18)).toFixed(2);
-    const ETH = isEthBalanceLoading
-      ? "Loading..."
-      : isEthBalanceError
-      ? "ERROR!"
-      : parseFloat(ethBalance?.formatted ?? "0").toFixed(2);
+    const BOX =
+      boxBalanceStatus === "loading"
+        ? "Loading..."
+        : boxBalanceStatus === "error"
+        ? "ERROR!"
+        : parseFloat(formatUnits(boxBalance ?? 0n, 18)).toFixed(2);
+    const USDC =
+      usdBalanceStatus === "loading"
+        ? "Loading..."
+        : usdBalanceStatus === "error"
+        ? "ERROR!"
+        : parseFloat(formatUnits(usdcBalance ?? "0")).toFixed(2);
 
     return tokens.buyToken === boxToken
-      ? { buyTokenBalance: BOX, saleTokenBalance: ETH }
-      : { buyTokenBalance: ETH, saleTokenBalance: BOX };
+      ? { buyTokenBalance: BOX, saleTokenBalance: USDC }
+      : { buyTokenBalance: USDC, saleTokenBalance: BOX };
   };
 
-  const value = {
+  console.log({
+    tokens,
+    sellAmount: sellAmount.toString(),
+    tokensReceivable,
+    ...getUserBalances(),
+  });
+
+  const value: TokenTransactionContextType = {
     tokens,
     switchTokens,
     sellAmount,
@@ -146,61 +123,15 @@ export const TokenTransactionProvider = ({ children }: TransactionsProps) => {
   };
 
   return (
-    <TokenTransactionContext.Provider value={value}>
-      {children}
-    </TokenTransactionContext.Provider>
+    <TokenTransactionContext.Provider value={value}>{children}</TokenTransactionContext.Provider>
   );
 };
 
-const useMint = ({
-  sellAmount,
-  tokensReceivable,
-}: Pick<TokenTransactionContextValue, "sellAmount" | "tokensReceivable">) => {
-  const addRecentTransaction = useAddRecentTransaction();
+export const useMarketMaker = () => {
+  const context = useContext(TokenTransactionContext);
+  if (!context) {
+    throw new Error("useTokenTransaction must be used within a TokenTransactionProvider");
+  }
 
-  const { config: mintConfig } = usePrepareMint({
-    value: sellAmount,
-    enabled: sellAmount > 0n,
-  });
-  const { write: buyBox, isLoading: isMintLoading } = useMintBox({
-    ...mintConfig,
-    onSuccess: (tx) => {
-      addRecentTransaction({
-        hash: tx.hash,
-        description: `Minted ${parseFloat(
-          formatEther(tokensReceivable ?? 0n)
-        ).toFixed(2)} BOX`,
-      });
-    },
-  });
-
-  return { buyBox, isMintLoading };
+  return context;
 };
-
-function useBurn({
-  sellAmount,
-  tokensReceivable,
-}: {
-  sellAmount: bigint;
-  tokensReceivable: bigint | undefined;
-}) {
-  const addRecentTransaction = useAddRecentTransaction();
-
-  const { config: burnConfig } = usePrepareBurn({
-    args: [sellAmount],
-    enabled: sellAmount > 0n,
-  });
-
-  const { write: sellBox, isLoading: isBurnLoading } = useBurnBox({
-    ...burnConfig,
-    onSuccess: (tx) => {
-      addRecentTransaction({
-        hash: tx.hash,
-        description: `Burned ${parseFloat(
-          formatEther(tokensReceivable ?? 0n)
-        ).toFixed(2)} BOX`,
-      });
-    },
-  });
-  return { sellBox, isBurnLoading };
-}

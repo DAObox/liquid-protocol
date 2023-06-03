@@ -341,4 +341,12 @@ contract MarketMaker is PluginCloneable, Modifiers {
     function reserveRatio() public view returns (uint32) {
         return _curve.reserveRatio;
     }
+
+    function friction() public view returns (uint32) {
+        return _curve.friction;
+    }
+
+    function theta() public view returns (uint32) {
+        return _curve.theta;
+    }
 }

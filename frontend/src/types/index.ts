@@ -22,3 +22,5 @@ export interface TokenTransactionContextValue {
   disableSwap: () => boolean;
   isLoading: boolean;
 }
+
+export type Address = `0x${string}`;

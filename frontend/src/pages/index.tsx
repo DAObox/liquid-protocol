@@ -12,7 +12,7 @@ const Index = () => {
     <div className="flex-col space-y-2">
       <NewDaoComponent />
       <USDCFaucet />
-      <OpenTrading />
+      {/* <OpenTrading /> */}
       <MarketMakerParams />
     </div>
   );

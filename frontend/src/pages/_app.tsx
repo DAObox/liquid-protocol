@@ -9,6 +9,7 @@ import { wagmiClient, chains } from "~/config-wagmi";
 import { Layout } from "../components/Layout";
 
 import "~/styles/globals.css";
+import { TokenTransactionProvider } from "~/contexts/TransactionContext";
 
 const MyApp: AppType = ({ Component, pageProps }) => {
   const [mounted, setMounted] = React.useState(false);
@@ -28,8 +29,10 @@ const MyApp: AppType = ({ Component, pageProps }) => {
         <AragonProvider>
           {mounted && (
             <Layout>
-              <Component {...pageProps} />
-              <Toaster position="top-left" />
+              <TokenTransactionProvider>
+                <Component {...pageProps} />
+                <Toaster position="top-left" />
+              </TokenTransactionProvider>
             </Layout>
           )}
         </AragonProvider>
