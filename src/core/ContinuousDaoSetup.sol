@@ -24,19 +24,16 @@ contract ContinuousDaoSetup is PluginSetup {
     /// @notice The address of the `TokenVoting` base contract.
     address private immutable tokenVotingBase;
 
-    address private immutable hatchBase;
-
     address private immutable governanceERC20Base;
 
     address private immutable marketMakerBase;
 
-    event DeployedContracts(address tokenVoting, address governanceERC20, address marketMaker);
+    event DeployedContracts(address tokenVoting, address governanceERC20, address marketMaker, address hatchAdmin);
 
     /// @notice The contract constructor, that deploys the bases.
     constructor() {
         tokenVotingBase = address(new TokenVoting());
         governanceERC20Base = address(new GovernanceBurnableERC20());
-        hatchBase = address(new SimpleHatch());
         marketMakerBase = address(new MarketMaker());
     }
 
@@ -52,53 +49,28 @@ contract ContinuousDaoSetup is PluginSetup {
             string memory symbol,
             address externalToken,
             MajorityVotingBase.VotingSettings memory votingSettings,
-            // HatchDeploymentInfo memory hatchInfo,
-            // VestingSchedule memory schedule,
-            CurveParameters memory curve
-        ) = abi.decode(
-            _data,
-            (
-                string,
-                string,
-                address,
-                MajorityVotingBase.VotingSettings,
-                // HatchDeploymentInfo,
-                // VestingSchedule,
-                CurveParameters
-            )
-        );
+            CurveParameters memory curve,
+            address hatchAdmin
+        ) = abi.decode(_data, (string, string, address, MajorityVotingBase.VotingSettings, CurveParameters, address));
 
         address[] memory helpers = new address[](3);
 
         // adding addresses directly into the helpers array to get around the stack limit
         helpers[0] = governanceERC20Base.clone();
         helpers[1] = marketMakerBase.clone();
-        helpers[2] = msg.sender; // hatchBase.clone();
+        helpers[2] = hatchAdmin; // hatchBase.clone();
 
         GovernanceBurnableERC20(helpers[0]).initialize(IDAO(_dao), name, symbol);
-        MarketMaker(helpers[1]).initialize(IDAO(_dao), IBondedToken(helpers[0]), IERC20(externalToken), curve);
-        // SimpleHatch(helpers[2]).initialize(
-        //     IDAO(_dao),
-        //     new HatchParameters({
-        //     externalToken: IERC20(externalToken),
-        //     bondedToken: helpers[0],
-        //     pool: helpers[1],
-        //     initialPrice: hatchInfo.initialPrice,
-        //     raised: 0,
-        //     minimumRaise: hatchInfo.minimumRaise,
-        //     maximumRaise: hatchInfo.maximumRaise,
-        //     hatchDeadline: hatchInfo.hatchDeadline,
-        //     status: HatchStatus.OPEN
-        //     }),
-        //     schedule
-        // );
+        MarketMaker(helpers[1]).initialize(
+            IDAO(_dao), GovernanceBurnableERC20(helpers[0]), IERC20(externalToken), curve
+        );
 
         plugin = createERC1967Proxy(
             address(tokenVotingBase),
             abi.encodeWithSelector(TokenVoting.initialize.selector, _dao, votingSettings, helpers[0])
         );
 
-        emit DeployedContracts(plugin, helpers[0], helpers[1]);
+        emit DeployedContracts(plugin, helpers[0], helpers[1], helpers[2]);
 
         // Prepare permissions
         PermissionLib.MultiTargetPermission[] memory permissions = new PermissionLib.MultiTargetPermission[](6);
@@ -140,7 +112,7 @@ contract ContinuousDaoSetup is PluginSetup {
         // MatketMaker Permission
         permissions[4] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Grant,
-            helpers[0], // Token
+            helpers[1], // MarketMaker
             helpers[2], // Hatch
             PermissionLib.NO_CONDITION,
             MarketMaker(helpers[1]).HATCH_PERMISSION_ID()

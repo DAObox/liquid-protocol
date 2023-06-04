@@ -68,7 +68,7 @@ abstract contract Modifiers {
         if (schedule.revoked == true) revert Errors.VestingScheduleRevoked();
         if (schedule.initialized == false) revert Errors.VestingScheduleNotInitialized();
         if (requested > releasable) {
-            revert Errors.NotEnoughVestedTokens({ requested: requested, available: releasable });
+            revert Errors.NotEnoughVestedTokens({requested: requested, available: releasable});
         }
         _;
     }

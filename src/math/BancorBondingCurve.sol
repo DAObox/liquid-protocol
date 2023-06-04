@@ -20,16 +20,21 @@ import { IBondingCurve } from "../interfaces/IBondingCurve.sol";
 contract BancorBondingCurve is IBondingCurve, BancorFormula {
     /// @inheritdoc IBondingCurve
     function getContinuousMintReward(
-        uint256 _reserveTokenAmount,
-        uint256 _continuousSupply,
-        uint256 _reserveBalance,
-        uint32 _reserveRatio
+        uint256 depositAmount,
+        uint256 continuousSupply,
+        uint256 reserveBalance,
+        uint32 reserveRatio
     )
         public
         view
         returns (uint256)
     {
-        return calculatePurchaseReturn(_continuousSupply, _reserveBalance, _reserveRatio, _reserveTokenAmount);
+        return calculatePurchaseReturn({
+            _supply: continuousSupply,
+            _reserveBalance: reserveBalance,
+            _reserveRatio: reserveRatio,
+            _depositAmount: depositAmount
+        });
     }
 
     /// @inheritdoc IBondingCurve

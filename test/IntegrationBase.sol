@@ -5,6 +5,7 @@ import { PRBTest } from "@prb/test/PRBTest.sol";
 import { console2 } from "forge-std/console2.sol";
 import { StdCheats } from "forge-std/StdCheats.sol";
 import { Vm } from "forge-std/Vm.sol";
+import { Helpers } from "./utils/Helpers.sol";
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { TokenVoting } from "@aragon/plugins/governance/majority-voting/token/TokenVoting.sol";
@@ -23,8 +24,11 @@ import { BancorBondingCurve } from "../src/math/BancorBondingCurve.sol";
 import { MockUSDC } from "../src/mocks/MockUSDC.sol";
 
 contract DAOParams {
+    uint32 public constant DENOMINATOR_PPM = 1_000_000;
     uint32 internal RATIO = 10 ** 4;
     uint64 internal ONE_DAY = 86_400;
+    bytes internal EMPTY_BYTES = "";
+    uint256 internal TOKEN = 10 ** 18;
 
     MajorityVotingBase.VotingSettings internal votingSettings = MajorityVotingBase.VotingSettings({
         votingMode: MajorityVotingBase.VotingMode.Standard,
@@ -43,12 +47,18 @@ contract DAOParams {
 }
 
 // NOTE: This should be run against a fork of mainnet
-contract IntegrationBase is DAOParams, PRBTest, StdCheats {
+contract IntegrationBase is DAOParams, Helpers {
+    // ----------------- AGENTS ------------------- //
+    address internal deployer;
+    address internal hatcher;
+    address internal alice;
+    address internal bob;
+
     DAOFactory internal daoFactory;
     PluginRepoFactory internal repoFactory;
     ContinuousDaoSetup internal continuousSetup;
     PluginRepo internal continuousRepo;
-    IERC20 internal externalToken;
+    MockUSDC internal externalToken;
     IBondingCurve internal bondingCurve;
     CurveParameters internal curveParams;
     DAOFactory.PluginSettings[] internal pluginSettings;
@@ -57,57 +67,137 @@ contract IntegrationBase is DAOParams, PRBTest, StdCheats {
     MarketMaker internal marketMaker;
     GovernanceBurnableERC20 internal governanceToken;
     TokenVoting internal voting;
+    address internal hatchAdmin;
 
     function setUp() public virtual {
+        createFork("mainnet", 17_328_640);
+        createAgents();
         setupRepo();
         deployContracts();
         deployDAO();
     }
 
+    function createFork(string memory network, uint256 blockNumber) public {
+        // Silently pass this test if there is no API key.
+
+        string memory alchemyApiKey = vm.envOr("API_KEY_ALCHEMY", string(""));
+        if (bytes(alchemyApiKey).length == 0) {
+            return;
+        }
+        // Otherwise, run the test against the mainnet fork.
+        vm.createSelectFork({urlOrAlias: network, blockNumber: blockNumber});
+        console2.log("Curent Block: ", blockNumber);
+    }
+
+    function createAgents() public {
+        deployer = createNamedUser("DEPLOYER");
+        hatcher = createNamedUser("HATCHER");
+        alice = createNamedUser("ALICE");
+        bob = createNamedUser("BOB");
+    }
+
     function setupRepo() public {
         daoFactory = DAOFactory(0xA03C2182af8eC460D498108C92E8638a580b94d4);
         repoFactory = PluginRepoFactory(0x96E54098317631641703404C06A5afAD89da7373);
+        vm.startPrank(deployer);
         continuousSetup = new ContinuousDaoSetup();
         continuousRepo = repoFactory.createPluginRepoWithFirstVersion({
             _subdomain: "continuous-dao",
             _pluginSetup: address(continuousSetup),
-            _maintainer: address(this),
+            _maintainer: address(deployer),
             _releaseMetadata: "0x00",
             _buildMetadata: "0x00"
         });
+        vm.stopPrank();
+        vm.label(address(continuousRepo), "continuousRepo");
+        vm.label(address(continuousSetup), "continuousSetup");
+        vm.label(address(repoFactory), "repoFactory");
+        vm.label(address(daoFactory), "daoFactory");
     }
 
     function deployContracts() public {
+        vm.prank(deployer);
         bondingCurve = IBondingCurve(new BancorBondingCurve());
-        externalToken = IERC20(address(new MockUSDC()));
-        curveParams = CurveParameters({ theta: 250_000, friction: 5000, reserveRatio: 300_000, formula: bondingCurve });
+        externalToken = new MockUSDC();
+        curveParams = CurveParameters({theta: 250_000, friction: 5000, reserveRatio: 300_000, formula: bondingCurve});
+        vm.label(address(bondingCurve), "bondingCurve");
+        vm.label(address(externalToken), "USDC");
+
+        // externalToken.mint(hatcher, 1_000_000 * TOKEN);
+        // externalToken.mint(alice, 100_000 * TOKEN);
+        // externalToken.mint(bob, 100_000 * TOKEN);
     }
 
     function deployDAO() public {
         pluginSettings.push(
             DAOFactory.PluginSettings({
                 pluginSetupRef: PluginSetupRef({
-                    versionTag: PluginRepo.Tag({ release: 1, build: 1 }),
+                    versionTag: PluginRepo.Tag({release: 1, build: 1}),
                     pluginSetupRepo: continuousRepo
                 }),
-                data: abi.encode("Continuous DAO", "CDAO", externalToken, votingSettings, curveParams)
+                data: abi.encode("Continuous DAO", "CDAO", externalToken, votingSettings, curveParams, address(hatcher))
             })
         );
 
         vm.recordLogs();
 
+        vm.prank(deployer);
         dao = daoFactory.createDao(daoSettings, pluginSettings);
-        console2.log("DAO: %s", address(dao));
+
         Vm.Log[] memory entries = Vm(address(vm)).getRecordedLogs();
 
         for (uint256 i = 0; i < entries.length; i++) {
-            if (entries[i].topics[0] == keccak256("DeployedContracts(address,address,address)")) {
-                (address _tokenVoting, address _token, address _marketMaker) =
-                    abi.decode(entries[i].data, (address, address, address));
+            if (entries[i].topics[0] == keccak256("DeployedContracts(address,address,address,address)")) {
+                (address _tokenVoting, address _token, address _marketMaker, address _hatchAdmin) =
+                    abi.decode(entries[i].data, (address, address, address, address));
                 marketMaker = MarketMaker(_marketMaker);
                 governanceToken = GovernanceBurnableERC20(_token);
                 voting = TokenVoting(_tokenVoting);
+                hatchAdmin = _hatchAdmin;
+
+                vm.label(address(dao), "dao");
+                vm.label(address(marketMaker), "marketMaker");
+                vm.label(address(governanceToken), "governanceToken");
+                vm.label(address(voting), "voting");
+                vm.label(address(hatchAdmin), "hatchAdmin");
             }
         }
+    }
+
+    function hatch() public {
+        hatch(100_000 ether, 100_000 ether);
+    }
+
+    function hatch(uint256 initialMint, uint256 initialDeposit) public {
+        externalToken.mint(hatcher, initialDeposit);
+
+        vm.startPrank(hatcher);
+        externalToken.approve(address(marketMaker), initialDeposit);
+        marketMaker.hatch({initialSupply: initialMint, fundingAmount: initialDeposit, hatchTo: hatcher});
+        vm.stopPrank();
+    }
+
+    // ----------------- BONDING CURVE WRAPPERS ------------------- //
+    function expectedPurchaseReturn(uint256 _depositAmount) public view returns (uint256) {
+        // the expected return is dependent on the reserve balance which will increase
+        // with the deposit amount. We need to calculate the reserve balance after the deposit
+        uint256 fundingAmount = (_depositAmount * curveParams.theta) / DENOMINATOR_PPM;
+        uint256 reserveAmount = _depositAmount - fundingAmount; // Calculate the reserve amount
+
+        return bondingCurve.getContinuousMintReward({
+            depositAmount: _depositAmount,
+            continuousSupply: governanceToken.totalSupply(),
+            reserveBalance: externalToken.balanceOf(address(marketMaker)) + reserveAmount,
+            reserveRatio: curveParams.reserveRatio
+        });
+    }
+
+    function expectedSaleReturn(uint256 _sellAmount) public view returns (uint256) {
+        return bondingCurve.getContinuousBurnRefund({
+            sellAmount: _sellAmount,
+            continuousSupply: governanceToken.totalSupply(),
+            reserveBalance: externalToken.balanceOf(address(marketMaker)),
+            reserveRatio: curveParams.reserveRatio
+        });
     }
 }
