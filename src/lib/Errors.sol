@@ -94,4 +94,20 @@ library Errors {
     error HatchNotCanceled();
 
     error NoContribution();
+
+    /// @notice Emitted when an invalid weight is provided
+    /// @param weight The invalid weight that was provided
+    /// @param maxWeight The maximum allowed weight
+    error InvalidWeight(uint64 weight, uint64 maxWeight);
+
+    /// @notice Emitted when a power source is added that has already been added before
+    /// @param source The address of the power source that was already added
+    error PowerSourceAlreadyAdded(address source);
+
+    /// @notice Emitted when an attempt is made to add more power sources than the maximum allowed
+    error TooManyPowerSources();
+
+    /// @notice Emitted when an address is not a power source
+    /// @param source The address that is not a power source
+    error NotAPowerSource(address source);
 }

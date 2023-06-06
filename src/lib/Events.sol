@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.17;
 
+import { PowerSource } from "../lib/Types.sol";
+
 library Events {
     /**
      * @dev Emitted when tokens are minted continuously (the normal minting process).
@@ -44,4 +46,23 @@ library Events {
      * @param amount The amount of bonded tokens that was minted to the hatcher.
      */
     event Hatch(address indexed hatcher, uint256 amount);
+
+    /// @notice Emitted when a new power source is added
+    /// @param sourceAddress The address of the power source that was added
+    /// @param sourceType The type of the power source that was added
+    /// @param weight The weight assigned to the power source
+    event AddPowerSource(address indexed sourceAddress, PowerSource sourceType, uint256 weight);
+
+    /// @notice Emitted when the weight of a power source is changed
+    /// @param sourceAddress The address of the power source whose weight was changed
+    /// @param newWeight The new weight assigned to the power source
+    event ChangePowerSourceWeight(address indexed sourceAddress, uint256 newWeight);
+
+    /// @notice Emitted when a power source is disabled
+    /// @param sourceAddress The address of the power source that was disabled
+    event DisablePowerSource(address indexed sourceAddress);
+
+    /// @notice Emitted when a power source is enabled
+    /// @param sourceAddress The address of the power source that was enabled
+    event EnablePowerSource(address indexed sourceAddress);
 }

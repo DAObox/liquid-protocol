@@ -91,3 +91,23 @@ struct HatchParameters {
     uint256 hatchDeadline;
     HatchStatus status;
 }
+
+/// @title TokenType
+/// @notice Enum representing the different types of tokens that can be used as a power source
+/// @dev ERC20 and ERC721 tokens need to be deposited into the contract to be counted for votes
+/// @dev IVotes and LensNFT tokens have snapshotting built in so they don't need to be staked
+enum TokenType {
+    ERC20, // Represents ERC20 tokens
+    ERC721, // Represents ERC721 tokens
+    IVotes, // Represents tokens using the IVotes interface
+    LensNFT // Represents LensNFT tokens
+}
+
+/// @title PowerSource
+/// @notice Struct representing a power source in the voting system
+/// @dev Each power source has an address, a type, and a weight
+struct PowerSource {
+    address sourceAddress; // The address of the power source
+    TokenType sourceType; // The type of the power source
+    uint256 weight; // The weight assigned to the power source
+}
