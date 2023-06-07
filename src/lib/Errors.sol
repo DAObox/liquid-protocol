@@ -98,7 +98,7 @@ library Errors {
     /// @notice Emitted when an invalid weight is provided
     /// @param weight The invalid weight that was provided
     /// @param maxWeight The maximum allowed weight
-    error InvalidWeight(uint64 weight, uint64 maxWeight);
+    error InvalidWeight(uint256 weight, uint256 maxWeight);
 
     /// @notice Emitted when a power source is added that has already been added before
     /// @param source The address of the power source that was already added
@@ -110,4 +110,13 @@ library Errors {
     /// @notice Emitted when an address is not a power source
     /// @param source The address that is not a power source
     error NotAPowerSource(address source);
+
+    /// @notice Emitted when an attempt is made to require boost with the zero address
+    error InvalidBoost();
+
+    error TotalWeightExceedsMax();
+
+    error InvalidPowerSource(address source);
+
+    error InvalidWeightsLength();
 }
